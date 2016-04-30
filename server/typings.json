@@ -1,0 +1,9 @@
+{
+  "ambientDependencies": {
+    "express": "github:DefinitelyTyped/DefinitelyTyped/express/express.d.ts#dd638012d63e069f2c99d06ef4dcc9616a943ee4",
+    "mime": "github:DefinitelyTyped/DefinitelyTyped/mime/mime.d.ts#cb5206a8ac1c9a3ddfd126f5ecea6729b2361452",
+    "mongoose": "github:DefinitelyTyped/DefinitelyTyped/mongoose/mongoose.d.ts#cebde64b3a1d63d07ee7c7dbc49b631ce220d027",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#dd638012d63e069f2c99d06ef4dcc9616a943ee4",
+    "serve-static": "github:DefinitelyTyped/DefinitelyTyped/serve-static/serve-static.d.ts#dd638012d63e069f2c99d06ef4dcc9616a943ee4"
+  }
+}

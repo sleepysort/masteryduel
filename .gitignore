@@ -1,0 +1,13 @@
+node_modules/
+
+client/**/*.js
+client/**/*.js.map
+
+server/**/*.js
+server/**/*.js.map
+
+**/typings/
+scripts/
+*.log
+*.pyc
+*.css
