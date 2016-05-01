@@ -3,18 +3,21 @@
     <head>
         <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="public/css/master.css" type="text/css" />
+        <link rel="stylesheet" href="/public/css/master.css" type="text/css" />
+
+        <script src="/lib/jquery/dist/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw=" crossorigin="anonymous"></script>
+        <script src="/lib/socket.io-client/socket.io.js"></script>
 
         <!-- IE required polyfills, in this exact order -->
-        <script src="lib/es6-shim/es6-shim.min.js"></script>
-        <script src="lib/systemjs/dist/system-polyfills.js"></script>
-        <script src="lib/angular2/es6/dev/src/testing/shims_for_IE.js"></script>
+        <script src="/lib/es6-shim/es6-shim.min.js"></script>
+        <script src="/lib/systemjs/dist/system-polyfills.js"></script>
+        <script src="/lib/angular2/es6/dev/src/testing/shims_for_IE.js"></script>
 
-        <script src="lib/angular2/bundles/angular2-polyfills.js"></script>
-        <script src="lib/systemjs/dist/system.src.js"></script>
-        <script src="lib/rxjs/bundles/Rx.js"></script>
-        <script src="lib/angular2/bundles/angular2.dev.js"></script>
-
+        <script src="/lib/angular2/bundles/angular2-polyfills.js"></script>
+        <script src="/lib/systemjs/dist/system.src.js"></script>
+        <script src="/lib/rxjs/bundles/Rx.js"></script>
+        <script src="/lib/angular2/bundles/angular2.dev.js"></script>
         <script>
             System.config({
                 packages: {
@@ -29,7 +32,7 @@
         </script>
     </head>
     <body>
-        <pj-app>
+        <md-app>
             <!--Page Loader-->
             <div class="PageLoaderContainer">
                 <div class="PageLoader">
@@ -38,6 +41,6 @@
                     <div id="LoaderBar3"></div>
                 </div>
             </div>
-        </pj-app>
+        </md-app>
     </body>
 </html>
