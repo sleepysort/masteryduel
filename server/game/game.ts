@@ -1,34 +1,52 @@
-import fetcher = require('./fetcher');
+import fetcher = require('../util/fetcher');
+import generator = require('../util/generator');
 import gm = require('./gamesmanager');
 import constants = require('../constants');
+import I = require('./interfaces');
+import Logger = require('../util/logger');
 
-// Generates a random string id
-export function generateId(length: number): string {
-	let chars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	let result = "";
-	for (let i = 0; i < length; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
+/**
+* Represents the various stages of the game
+*/
+export enum GameState {
+	/** DO NOT USE */
+	None,
+	/** Not enough players to begin */
+	Waiting,
+	/** Players are picking their decks */
+	NotStarted,
+	/** Game is in progress */
+	Started,
+	/** Game is over */
+	Over
 }
 
+/**
+* Representation of the game and the state of the game
+*/
 export class Game {
-	private gamesManager: gm.GamesManager;
+	/** The unique id for this game */
 	private gameId: string;
+
+	/** Enum representing the current stage of the game */
 	private gameState: GameState;
 
-	/**
-	 * The turn number of the game
-	 * 0 is before the game starts
-	 * Nexus is invulnerable until turn 4
-	 */
+	/** The turn number of the game. 0 is before the game starts. Nexus is invulnerable until turn 4. */
 	private turnNum: number;
+
+	/** The number of moves left in this turn */
 	private movesCount: number;
+
+	/** Dictionary of active champions in the game (active meaning in hand or on the rift) */
 	private activeChamps: {[uid: string]: Champion};
+
+	/** The players in this game */
 	private players: Player[];
 
-	constructor(gamesManager: gm.GamesManager, gameId: string) {
-		this.gamesManager = gamesManager;
+	/**
+	* @param the game id for this game
+	*/
+	constructor(gameId: string) {
 		this.gameId = gameId;
 		this.gameState = GameState.Waiting;
 		this.turnNum = 0;
@@ -37,66 +55,96 @@ export class Game {
 		this.players = [];
 	}
 
-	public addPlayer(sock: SocketIO.Socket) {
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Player management methods
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	* Adds a player to the game
+	* @throws Error if the game is full
+	* @param sock	socket that is connected to the player
+	* @return the generated playerId for this player
+	*/
+	public addPlayer(sock: SocketIO.Socket): string {
 		if (this.players.length === constants.MAX_PLAYERS) {
-			throw new Error("The game is full.");
+			Logger.log(Logger.Tag.Network, 'Attempt to join game ' + this.gameId + ' rejected. Game is full.');
+			throw new Error('The game is full.');
 		}
 
-		let playerId = generateId(6);
+		let playerId = generator.generateId(6);
 		let player = new Player(playerId, sock);
 		this.players.push(player);
 
-		console.log(playerId + ' joined ' + this.gameId + ' successfully');
+		Logger.log(Logger.Tag.Game, 'Player ' + playerId + ' successfully joined game.', this.gameId);
 
 		sock.on('disconnect', () => {
-			console.log('player ' + playerId + ' disconnected');
+			Logger.log(Logger.Tag.Network, 'Player ' + playerId + ' disconnected from game ' + this.gameId + '.');
 			this.players.splice(this.players.indexOf(player), 1);
 			this.gameState = GameState.Over;
 			this.emitAll('gameover', { reason: 'Player disconnected' });
 			if (this.isGameEmpty()) {
-				this.gamesManager.removeGame(this.gameId);
+				gm.GamesManager.getInstance().removeGame(this.gameId);
 			}
 			return;
 		});
 
-        sock.emit('gamejoin-ack', {
+		let ackMsg: I.DataGameJoinAck = {
             success: true,
             playerId: playerId
-        });
+        };
+
+        sock.emit('gamejoin-ack', ackMsg);
 
 		if (this.players.length === constants.MAX_PLAYERS) {
 			this.gameState = GameState.NotStarted;
 
-			console.log('Two players joined. Waiting for summoners.');
-			this.emitAll('gameprep', { message: "Select a summoner deck." });
-			// TODO: wait for summoner selection
-			this.onAll('gameselect', (msg: any) => {
-				console.log(msg.playerId + ' selecting ' + msg.summonerName);
+			Logger.log(Logger.Tag.Game, 'Waiting for players to get ready.', this.gameId);
+
+			let prepMsg: I.DataGamePrep = { message: "Select a summoner deck." };
+			this.emitAll('gameprep', prepMsg);
+
+			// TODO: Right now, we are relying on the correctness of the client's message for the player id, when we should really just be using it for validation
+			this.onAll('gameselect', (msg: I.DataGameSelect) => {
 				let player = this.getPlayer(msg.playerId);
+
+				Logger.log(Logger.Tag.Game, 'Attempting to load deck \'' + msg.summonerName + '\' for player ' + player.getId(), this.gameId);
+
+				// Get the summoner id from name, then load mastery data, then load the deck.
+				// If all players are loaded, initialize the game.
 				fetcher.getSummonerId(msg.summonerName)
 						.then(fetcher.getSummonerDeck)
-						.then((value: any[]) => {
+						.then((value: I.ChampionMinData[]) => {
 							player.setDeck(Deck.createDeck(msg.summonerName, value));
-							console.log(msg.playerId + ' loaded ' + msg.summonerName + ' deck');
-							player.getSocket().emit('gameselect-ack', { succcess: true });
+
+							Logger.log(Logger.Tag.Game, 'Successfully loaded deck \'' + msg.summonerName + '\' for player ' + player.getId(), this.gameId);
+
+							let selAck: I.DataGameSelectAck = { success: true };
+							player.getSocket().emit('gameselect-ack', selAck);
+
 							return this.isGameReady();
 						}).then((value: boolean) => {
+							// Both players have loaded their decks
 							if (value) {
-								console.log('both players loaded. starting game.');
-								this.initializeGame();
+								Logger.log(Logger.Tag.Game, 'All players loaded. Initializing game.', this.gameId);
+
+								this.onGameStarted();
 								this.offAll('gameselect');
-								this.onAll('gamemove', (move: any) => {
+
+								this.onAll('gamemove', (move: I.DataGameMove) => {
 									this.applyMove(move);
 								});
 							}
 						});
 			});
-			let x = (r) => r;
 		}
 
 		return playerId;
 	}
 
+	/**
+	* @param the player id
+	* @return the Player object with the given id; null if it doesn't exist
+	*/
 	public getPlayer(playerId: string): Player {
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].getId() === playerId) return this.players[i];
@@ -104,6 +152,10 @@ export class Game {
 		return null;
 	}
 
+	/**
+	* @param the player id
+	* @return the Player object of the opponent (i.e. not the one with the given id); null if it doesn't exist
+	*/
 	public getOpponent(playerId: string): Player {
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].getId() !== playerId) return this.players[i];
@@ -111,6 +163,17 @@ export class Game {
 		return null;
 	}
 
+	/**
+	* @return the number of players in the game
+	*/
+	public getPlayerCount(): number {
+		return this.players.length;
+	}
+
+	/**
+	* @throws Error if the player doesn't have 5 cards
+	* @return the hand of the given player
+	*/
 	public getHand(playerId: string): Champion[] {
 		let player = this.getPlayer(playerId);
 		let result = [];
@@ -128,30 +191,59 @@ export class Game {
 		return result;
 	}
 
+	/**
+	* @return the player id of the player whose current turn it is
+	*/
+	public getCurrentTurnPlayerId(): string {
+		return this.players[this.turnNum % this.players.length].getId();
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Socket event listener helper methods
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	* Transmits the given data to all player sockets
+	* @param event	the event type to emit
+	* @param data	the data to transmit
+	*/
 	public emitAll(event: string, data?: any): void {
 		for (let i = 0; i < this.players.length; i++) {
 			this.players[i].getSocket().emit(event, data);
 		}
 	}
 
-	public onAll(event: string, handler: any) {
+	/**
+	* Attaches a given handler to all player sockets
+	* @param event		the event type to listen for
+	* @param handler	the handler to attach
+	*/
+	public onAll(event: string, handler: any): void {
 		for (let i = 0; i < this.players.length; i++) {
 			this.players[i].getSocket().on(event, handler);
 		}
 	}
 
-	public offAll(event: string) {
+	/**
+	* Removes all handlers of a given event type for all player sockets
+	* @param event	the event type to detach from
+	*/
+	public offAll(event: string): void {
 		for (let i = 0; i < this.players.length; i++) {
 			this.players[i].getSocket().removeAllListeners(event);
 		}
 	}
 
-	public getPlayerCount(): number {
-		return this.players.length;
-	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Game state and lifecycle methods
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	* @return whether all players are ready (i.e. have selected summoner decks)
+	*/
 	public isGameReady(): boolean {
-		console.log('checking for readiness');
 		let ready = this.players.length === 2;
 		for (let i = 0; i < this.players.length; i++) {
 			ready = ready && this.players[i].isReady();
@@ -159,44 +251,52 @@ export class Game {
 		return ready;
 	}
 
+	/**
+	* @return whether there are 0 players in the game
+	*/
 	public isGameEmpty(): boolean {
 		return this.players.length === 0;
 	}
 
-	public start(): void {
-		if (this.gameState === GameState.Started) {
-			return;
-		} else if (this.gameState === GameState.Over) {
-			throw new Error("Game is already over.");
-		} else if (this.gameState === GameState.Waiting) {
-			throw new Error("Not enough players to start.");
-		}
+	/**
+	* Handles the transition from the NotStarted stage to the Started stage
+	*/
+	private onGameStarted(): void {
 		this.gameState = GameState.Started;
-	}
-
-	public initializeGame(): void {
-		this.start();
 		this.turnNum = 1;
 		this.movesCount = 2;
-		console.log('initializing game ' + this.players.length);
 		for (let i = 0; i < this.players.length; i++) {
 			this.players[i].initializeHand(5, this.activeChamps);
 			this.players[i].getSocket().emit('gameinit', {
 				hand: this.getHand(this.players[i].getId()),
-				starter: this.getCurrentTurnPlayer()
+				starter: this.getCurrentTurnPlayerId()
 			});
 		}
 	}
 
-	public getCurrentTurnPlayer(): string {
-		return this.players[this.turnNum % this.players.length].getId();
+	/**
+	* Handles the transition from the Started stage to the Over stage
+	*/
+	private onGameOver(player: Player): void {
+		console.log('game over: winner is ' + player.getId());
 	}
 
-	public applyMove(move: any) {
-		let player = this.getPlayer(move.playerId);
-		let update: any = {};
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Game update methods
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-		if (player.getId() !== this.getCurrentTurnPlayer()) {
+	/**
+	* Attempts to apply a given move and sends out the updates to the players. If the move
+	* is invalid or illegal, a 'gameerror' event will be emitted to the violating player.
+	*/
+	private applyMove(move: I.DataGameMove) {
+		let player = this.getPlayer(move.playerId);
+		let update: I.DataGameUpdate = {
+			turnNum: -1,
+			turnPlayer: null
+		};
+
+		if (player.getId() !== this.getCurrentTurnPlayerId()) {
 			player.getSocket().emit('gameerror', {
 				reason: 'It is not your turn to make a move.',
 			});
@@ -211,15 +311,16 @@ export class Game {
 			} else if (move.ability) {
 				this.tryAbility(player, move.ability, update);
 			} else if (move.moveChamp) {
-				console.log('moving...')
 				this.tryMoveChamp(player, move.moveChamp, update);
 			} else {  // Invalid move
+				Logger.log(Logger.Tag.Game, 'Invalid move was made.', this.gameId);
 				player.getSocket().emit('gameerror', {
 					reason: 'Invalid move',
 				});
 				return;
 			}
 		} catch (err) {
+			Logger.log(Logger.Tag.Game, err.message, this.gameId);
 			player.getSocket().emit('gameerror', {
 				reason: err.message
 			});
@@ -237,23 +338,31 @@ export class Game {
 		this.tickFountains();
 
 		update.turnNum = this.turnNum;
-		update.turnPlayer = this.getCurrentTurnPlayer();
+		update.turnPlayer = this.getCurrentTurnPlayerId();
 
 		// TODO: Instead of emitAll, process update so that each player only sees their own hand
 		this.emitAll('gameupdate', update);
 	}
 
+	/**
+	* Ticks each player's fountain to decrement death timers and move champions from fountain to
+	* deck.
+	*/
 	private tickFountains(): void {
 		for (let i = 0; i < this.players.length; i++) {
 			this.players[i].tickFountain();
 		}
 	}
 
-	public tryAttackNexus(player: Player, data: any, update: any): void {
-		let source = this.activeChamps[data.sourceUid];
+	private tryAttackNexus(player: Player, data: any, update: I.DataGameUpdate): void {
+		let source = this.activeChamps[data.uid];
+
+		if (source.getLocation() === Location.Hand) {
+			throw new Error('Cannot attack from hand');
+		}
+
 		let opp = this.getOpponent(player.getId());
 
-		// TODO: Check to see its not in hand
 		// Check to see if there are enemies in the lane
 		for (let uid in this.activeChamps) {
 			let curr = this.activeChamps[uid];
@@ -268,7 +377,7 @@ export class Game {
 
 		// If opponent health is zero, end the game
 		if (opp.applyDamage(data.source.getDamage())) {
-			this.gameOver(player);
+			this.onGameOver(player);
 		}
 
 		// Add data to update object
@@ -276,7 +385,7 @@ export class Game {
 		update.nexus[opp.getId()] = opp.getHealth();
 	}
 
-	public tryAttackChamp(player: Player, data: any, update: any): void {
+	private tryAttackChamp(player: Player, data: any, update: I.DataGameUpdate): void {
 		let source = this.activeChamps[data.sourceUid];
 		let target = this.activeChamps[data.targetUid];
 
@@ -292,11 +401,20 @@ export class Game {
 			throw new Error('Cannot attack your own champion');
 		}
 
-		// Check source is not in hand
-		// Check target is in same lane
+		if (source.getLocation() === Location.Hand) {
+			throw new Error('Cannot attack from hand')
+		}
+
+		if (source.getLocation() !== target.getLocation()) {
+			throw new Error('Cannot attack a champion in a different lane')
+		}
 
 		if (target.getInvulnTurn() >= this.turnNum) {
 			throw new Error('Target is invulnerable');
+		}
+
+		if (source.getStunnedTurn() >= this.turnNum) {
+			throw new Error('Cannot attack while stunned');
 		}
 
 		update.killed = [];
@@ -315,11 +433,11 @@ export class Game {
 		}
 	}
 
-	public tryAbility(player: Player, data: any, update: any): void {
+	private tryAbility(player: Player, data: any, update: I.DataGameUpdate): void {
 		throw new Error('Abilities not yet supported');
 	}
 
-	public tryMoveChamp(player: Player, data: any, update: any): void {
+	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): void {
 		let champ = this.activeChamps[data.uid];
 
 		if (!champ) {
@@ -362,63 +480,93 @@ export class Game {
 			uid: champ.getUid(),
 			location: champ.getLocation()
 		});
-
-	}
-
-	private gameOver(player: Player): void {
-		console.log('game over: winner is ' + player.getId());
 	}
 }
 
-export enum GameState {
-	None,  // do not use
-	Waiting,
-	NotStarted,
-	Started,
-	Over
-}
-
+/**
+* Representation of a player in the game
+*/
 export class Player {
+	/** The player id */
 	private id: string;
+
+	/** The socket corresponding the player client */
 	private sock: SocketIO.Socket;
+
+	/** The health of the player */
 	private health: number;
+
+	/** The player's deck */
 	private deck: Deck;
+
+	/** The turn number until which that the player is invulnerable */
 	private invulnTurn: number;
+
+	/** The player's fountain */
 	private fountain: {championId: number, championLevel: number, deathTimer: number}[];
 
+	/** Whether the player is ready */
 	private ready: boolean;
 
+	/**
+	* @param playerId	the id of the this player
+	* @param sock		the socket connected to the player's client
+	*/
 	constructor(playerId: string, sock: SocketIO.Socket) {
 		this.id = playerId;
 		this.sock = sock;
 		this.health = 10;
 		this.deck = null;
 		this.ready = false;
-		this.invulnTurn = 3;
+		this.invulnTurn = 3;  // Players cannot take damage until turn 3
 		this.fountain = [];
 	}
 
+	/**
+	* @return the socket associated with this player
+	*/
 	public getSocket(): SocketIO.Socket {
 		return this.sock;
 	}
 
+	/**
+	* @return the id of the player
+	*/
 	public getId(): string {
 		return this.id;
 	}
 
+	/**
+	* @return the deck of the player
+	*/
 	public getDeck(): Deck {
 		return this.deck;
 	}
 
+	/**
+	* Updates the player's deck, and setting the player to be ready; if the given deck is null,
+	* the player's ready state will not be updated
+	* @param d	the deck to use for the player
+	*/
 	public setDeck(d: Deck): void {
-		this.deck = d;
-		this.ready = true;
+		if (d) {
+			this.deck = d;
+			this.ready = true;
+		}
 	}
 
+	/**
+	* @return whether the player is ready
+	*/
 	public isReady(): boolean {
 		return this.ready;
 	}
 
+	/**
+	* Sets up the hand for the start of the game
+	* @param count 			the number of cards to start off in the hand
+	* @param activeChamps	a reference to the game's activeChampion dictionary
+	*/
 	public initializeHand(count: number, activeChamps: any): void {
 		for (let i = 0; i < count; i++) {
 			let c = this.deck.drawChampion(this.id);
@@ -426,20 +574,34 @@ export class Player {
 		}
 	}
 
+	/**
+	* @return the player's health
+	*/
 	public getHealth(): number {
 		return this.health;
 	}
 
+	/**
+	* @return the turn number until which the player is invulnerable
+	*/
 	public getInvulnTurn(): number {
 		return this.invulnTurn;
 	}
 
-	/** Returns true if health is 0 */
+	/**
+	* Applies damage to the player
+	* @param dmg	the amount of damage to apply
+	* @returns whether the player has been defeated
+	*/
 	public applyDamage(dmg: number): boolean {
 		this.health -= Math.min(dmg, this.health);
 		return this.health === 0;
 	}
 
+	/**
+	* Ticks the player's fountain, decrementing death timers and moving champions
+	* to the deck if needed
+	*/
 	public tickFountain(): void {
 		for (let i = 0; i < this.fountain.length; i++) {
 			let curr = this.fountain[i];
@@ -451,8 +613,11 @@ export class Player {
 		}
 	}
 
-	/** */
-	public sendToFountain(champ: Champion) {
+	/**
+	* Adds a champion to the player's fountain
+	* @param champ the champion to send to the fountain
+	*/
+	public sendToFountain(champ: Champion): void {
 		this.fountain.push({
 			championId: champ.getChampId(),
 			championLevel: champ.getChampLevel(),
@@ -461,6 +626,9 @@ export class Player {
 	}
 }
 
+/**
+* Representation of a champion/card in the game
+*/
 export class Champion {
 	private champId: number;
 	private uid: string;
@@ -474,7 +642,7 @@ export class Champion {
 	private invulnTurn: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
-		this.uid = generateId(8);
+		this.uid = generator.generateId(8);
 		this.champId = champId;
 		this.champLevel = champLevel; this.owner = owner;
 		this.owner = owner;
@@ -532,11 +700,17 @@ export class Champion {
 	}
 }
 
+/**
+* Representation of a champion ability
+*/
 export interface Ability {
 	effect: (context: any) => void;
 	readyTurn: number;  // cooldown; when game.turnNum >= readyTurn, ability can be used
 }
 
+/**
+* The possible locations for a champion
+*/
 export enum Location {
 	None, // Do not use
 	Hand,
@@ -547,6 +721,9 @@ export enum Location {
 	JungleBot
 }
 
+/**
+* Representation of a player's deck in the game
+*/
 export class Deck {
 	private summonerName: string;
 	private summonerId: string;
@@ -557,12 +734,12 @@ export class Deck {
 		this.champions = [];
 	}
 
-	public static createDeck(summonerName: string, rawData: any): Deck {
+	public static createDeck(summonerName: string, rawData: I.ChampionMinData[]): Deck {
 		if (!rawData.length || rawData.length === 0) {
 			return null;
 		}
 
-		let resultDeck = new Deck(summonerName, rawData[0].playerId);
+		let resultDeck = new Deck(summonerName, rawData[0].summonerId);
 		for (let i = 0; i < rawData.length; i++) {
 			resultDeck.addChampion(rawData[i].championId, rawData[i].championLevel);
 		}

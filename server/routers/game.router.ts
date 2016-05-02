@@ -7,7 +7,7 @@ import GM = require('../game/gamesmanager');
 let gameRouter = express.Router();
 let gamesManager = GM.GamesManager.getInstance();
 
-gameRouter.get('/', (req: express.Request, res: express.Response) => {
+gameRouter.get('/new', (req: express.Request, res: express.Response) => {
 	let gameId = gamesManager.addGame();
 	res.redirect("/game/" + gameId);
 });

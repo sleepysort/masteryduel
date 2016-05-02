@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
 			this.sock.on('gameerror', (msg) => {console.log(msg)});
 		});
 
-		this.sock.emit('gamejoin', this.getGameId());
+		this.sock.emit('gamejoin', {gameId: this.getGameId()});
 	}
 
 	private getGameId(): string {

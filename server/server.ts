@@ -3,6 +3,8 @@ import express = require('express');
 import path = require('path');
 import constants = require('./constants');
 import GM = require('./game/gamesmanager');
+import Logger = require('./util/logger');
+import I = require('./game/interfaces');
 
 let gameRouter = require('./routers/game.router');
 let lolapiRouter = require('./routers/lolapi.router');
@@ -40,12 +42,12 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 io.on('connection', (sock: SocketIO.Socket) => {
     // TODO: race condition
-    sock.once('gamejoin', (msg: string) => {
-        console.log('Game join request: ' + msg);
-        let currGame = gamesManager.getGame(msg);
+    sock.once('gamejoin', (msg: I.DataGameJoin) => {
+        Logger.log(Logger.Tag.Network, 'Attempting to join game ' + msg.gameId + '.');
+        let currGame = gamesManager.getGame(msg.gameId);
 
         if (!currGame) {
-            console.log('Game join failed: game does not exist.');
+            Logger.log(Logger.Tag.Network, 'Failed to join game ' + msg.gameId + '. Game does not exist.');
             sock.emit('gamejoin-ack', {
                 success: false,
                 reason: 'This game does not exist.'
@@ -57,7 +59,7 @@ io.on('connection', (sock: SocketIO.Socket) => {
         try {
             currGame.addPlayer(sock);
         } catch (err) {
-            console.log(err);
+            Logger.log(Logger.Tag.Network, 'Failed to join game ' + msg.gameId + '. Game is already full.');
             sock.emit('gamejoin-ack', {
                 success: false,
                 reason: 'This game already has two players.'
@@ -70,5 +72,5 @@ io.on('connection', (sock: SocketIO.Socket) => {
 server.listen(port, () => {
     let host = server.address().address;
     let port = server.address().port;
-    console.log('This express app is listening on port:' + port);
+    Logger.log(Logger.Tag.System, 'Server started on ' + host + ':' + port);
 });

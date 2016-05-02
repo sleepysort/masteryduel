@@ -6,7 +6,6 @@ import constants = require('../constants');
 export function getSummonerId(name: string): Promise.IThenable<number> {
 	return new Promise((resolve, reject) => {
 		let reqUrl = constants.LOL_API_URL + '/api/lol/na/v1.4/summoner/by-name/' + name + '?' + constants.LOL_API_KEY;
-		console.log(reqUrl);
 		let options = {
 			uri: reqUrl,
 			json: true
@@ -24,7 +23,6 @@ export function getSummonerId(name: string): Promise.IThenable<number> {
 export function getSummonerDeck(summonerId: number): Promise.IThenable<any[]> {
 	return new Promise((resolve, reject) => {
 		let reqUrl = constants.LOL_API_URL + '/championmastery/location/na1/player/' + summonerId + '/champions?' + constants.LOL_API_KEY;
-		console.log(reqUrl);
 		let options = {
 			uri: reqUrl,
 			json: true
