@@ -1,0 +1,21 @@
+<div *ngIf="champData" class="champion" (click)="toggleControls()">
+    <div class="champ-card">
+        <img class="champ-image" src="{{champImgUrl}}"/>
+        <img class="champ-border" src="/public/img/card-border.png" />
+    </div>
+    <div class="champ-stats">
+        <div>{{champName}}</div>
+        <div>Health: {{champData.health}}</div>
+        <div>Damage: {{champData.dmg}}</div>
+    </div>
+    <div class="champ-mask" [hidden]="hideControls">
+        <div class="champ-controls">
+            <button class="champ-control-btn" (click)="onAttackButtonClick($event)">Attack</button>
+            <button class="champ-control-btn" (click)="onMoveButtonClick($event)">Move</button>
+            <button class="champ-control-btn" (click)="onCancelButtonClick()">x</button>
+        </div>
+    </div>
+    <div class="champ-banner">
+        <img class="mastery-crest" src="/public/img/mastery-{{champData.champLevel}}.png" />
+    </div>
+</div>

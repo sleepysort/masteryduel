@@ -1,0 +1,31 @@
+<div class="champion-positioner">
+	<div class="hand-container">
+		<md-champion *ngFor="let champ of hand" [champData]="champ"></md-champion>
+	</div>
+	<div class="lane-container">
+		<div class="lane-top" [class.active]="topLaneStyles.isActive" (click)="onTopLaneClicked()">
+			<div class="lane-enemy">
+				<md-champion *ngFor="let champ of topLaneEnemies" [champData]="champ"></md-champion>
+			</div>
+			<div class="lane-ally">
+				<md-champion *ngFor="let champ of topLaneAllies" [champData]="champ"></md-champion>
+			</div>
+		</div>
+		<div class="lane-mid" [class.active]="midLaneStyles.isActive" (click)="onMidLaneClicked()">
+			<div class="lane-enemy">
+				<md-champion *ngFor="let champ of midLaneEnemies" [champData]="champ"></md-champion>
+			</div>
+			<div class="lane-ally">
+				<md-champion *ngFor="let champ of midLaneAllies" [champData]="champ"></md-champion>
+			</div>
+		</div>
+		<div class="lane-bot" [class.active]="botLaneStyles.isActive" (click)="onBotLaneClicked()">
+			<div class="lane-enemy">
+				<md-champion *ngFor="let champ of botLaneEnemies" [champData]="champ"></md-champion>
+			</div>
+			<div class="lane-ally">
+				<md-champion *ngFor="let champ of botLaneAllies" [champData]="champ"></md-champion>
+			</div>
+		</div>
+	</div>
+</div>

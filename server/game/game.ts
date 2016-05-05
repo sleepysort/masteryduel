@@ -134,6 +134,8 @@ export class Game {
 									this.applyMove(move);
 								});
 							}
+						}).catch(() => {
+							player.getSocket().emit('gameerror', {reason: "Failed to load deck."});
 						});
 			});
 		}
@@ -291,6 +293,11 @@ export class Game {
 	*/
 	private applyMove(move: I.DataGameMove) {
 		let player = this.getPlayer(move.playerId);
+
+		// TODO: fix this. It's a big problem; silent failure.
+		if (player === null) return;
+		let opponent = this.getOpponent(move.playerId);
+
 		let update: I.DataGameUpdate = {
 			turnNum: -1,
 			turnPlayer: null
@@ -303,6 +310,8 @@ export class Game {
 			return;
 		}
 
+		let wasFromHand = false;
+
 		try {
 			if (move.attackNexus) {
 				this.tryAttackNexus(player, move.attackNexus, update);
@@ -311,7 +320,7 @@ export class Game {
 			} else if (move.ability) {
 				this.tryAbility(player, move.ability, update);
 			} else if (move.moveChamp) {
-				this.tryMoveChamp(player, move.moveChamp, update);
+				wasFromHand = this.tryMoveChamp(player, move.moveChamp, update);
 			} else {  // Invalid move
 				Logger.log(Logger.Tag.Game, 'Invalid move was made.', this.gameId);
 				player.getSocket().emit('gameerror', {
@@ -327,6 +336,12 @@ export class Game {
 			return;
 		}
 
+		// Lol. If you look at this and not laugh, something is wrong with you.
+		let opUpdate = JSON.parse(JSON.stringify(update));
+		if (wasFromHand) {
+			this.tryHandAndSpawn(player, move.moveChamp, update, opUpdate);
+		}
+
 		this.movesCount--;
 
 		// Next player's turn
@@ -339,9 +354,12 @@ export class Game {
 
 		update.turnNum = this.turnNum;
 		update.turnPlayer = this.getCurrentTurnPlayerId();
+		opUpdate.turnNum = this.turnNum;
+		opUpdate.turnPlayer = this.getCurrentTurnPlayerId();
 
 		// TODO: Instead of emitAll, process update so that each player only sees their own hand
-		this.emitAll('gameupdate', update);
+		player.getSocket().emit('gameupdate', update);
+		opponent.getSocket().emit('gameupdate', opUpdate);
 	}
 
 	/**
@@ -423,12 +441,13 @@ export class Game {
 		// If enemy is killed, send to fountain
 		if (source.attackEnemy(target)) {
 			this.getPlayer(target.getOwner()).sendToFountain(target);
-			update.killed.push(target.getUid());
+			update.killed.push({uid: target.getUid(), killer: source.getUid()});
 			delete this.activeChamps[target.getUid()];
 		} else {
 			update.damaged.push({
 				uid: target.getUid(),
-				health: target.getHealth()
+				health: target.getHealth(),
+				attacker: source.getUid()
 			});
 		}
 	}
@@ -437,7 +456,7 @@ export class Game {
 		throw new Error('Abilities not yet supported');
 	}
 
-	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): void {
+	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): boolean {
 		let champ = this.activeChamps[data.uid];
 
 		if (!champ) {
@@ -464,22 +483,38 @@ export class Game {
 			throw new Error('Cannot move more than one lane over');
 		}
 
-		update.newChamps = [];
-
-		// Draw a new champion to the hand
-		if (champ.getLocation() === Location.Hand) {
-			let drawnChamp = player.getDeck().drawChampion(player.getId());
-			this.activeChamps[drawnChamp.getUid()] = drawnChamp;
-			update.newChamps.push(drawnChamp);
-		}
-
 		update.moved = [];
+
+		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.setLocation(data.targetLocation);
 		update.moved.push({
 			uid: champ.getUid(),
 			location: champ.getLocation()
 		});
+
+		return wasFromHand;
+	}
+
+	public tryHandAndSpawn(player: Player, data: any, update: I.DataGameUpdate, opUpdate: I.DataGameUpdate) {
+		let champ = this.activeChamps[data.uid];
+
+		if (!champ) {
+			throw new Error('Invalid champion');
+		}
+
+		if (champ.getOwner() !== player.getId()) {
+			throw new Error('Cannot move opponent champion');
+		}
+
+		opUpdate.enemySpawn = [];
+		update.hand = [];
+
+		opUpdate.enemySpawn.push(champ);
+		delete opUpdate.moved;
+		let drawnChamp = player.getDeck().drawChampion(player.getId());
+		this.activeChamps[drawnChamp.getUid()] = drawnChamp;
+		update.hand.push(drawnChamp);
 	}
 }
 

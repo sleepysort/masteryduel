@@ -13,6 +13,8 @@ export function getSummonerId(name: string): Promise.IThenable<number> {
 		request.get(options, (err, response, body) => {
 			if (err) {
 				reject(response);
+			} else if (!body[name] || !body[name].id) {
+				reject(response);
 			} else {
 				resolve(body[name].id);
 			}

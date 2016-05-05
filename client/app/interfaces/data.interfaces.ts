@@ -1,4 +1,27 @@
-import g = require('./game');
+/**
+* The possible locations for a champion
+*/
+export enum Location {
+	None, // Do not use
+	Hand,
+	LaneTop,
+	LaneMid,
+	LaneBot,
+	JungleTop,
+	JungleBot
+}
+
+export interface ChampionData {
+	champId: number;
+	uid: string;
+	champLevel: number;
+	owner: string;
+	health: number;
+	dmg: number;
+	currentLocation: Location;
+	stunnedTurn: number;
+	invulnTurn: number;
+}
 
 export interface DataGameError {
 	errorCode: number;
@@ -30,7 +53,7 @@ export interface DataGameSelectAck {
 }
 
 export interface DataGameInit {
-	hand: g.Champion[];
+	hand: ChampionData[];
 	starter: string;
 }
 
@@ -53,7 +76,7 @@ export interface DataGameMove {
 
 	moveChamp?: {
 		uid: string;
-		targetLocation: g.Location;
+		targetLocation: Location;
 	};
 
 	/** Not yet implemented */
@@ -64,19 +87,10 @@ export interface DataGameUpdate {
 	nexus?: {[playerId: string]: number};
 	killed?: { uid: string, killer: string }[];
 	damaged?: { uid: string, health: number, attacker: string }[];
-	hand?: g.Champion[];
-	enemySpawn?: g.Champion[];
-	moved?: { uid: string, location: g.Location }[];
+	hand?: ChampionData[];
+	enemySpawn?: ChampionData[];
+	moved?: { uid: string, location: Location }[];
 
 	turnNum: number;
 	turnPlayer: string;
-}
-
-/**
-* Minimal champion data used for fountain and deck
-*/
-export interface ChampionMinData {
-	summonerId: number;
-	championId: number;
-	championLevel: number;
 }

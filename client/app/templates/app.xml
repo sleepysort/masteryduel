@@ -1,3 +1,16 @@
-<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
-<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
-<button (click)="sendMessage()">Send</button>
+<img src="/public/img/bg.png" class="background" />
+
+<div>
+	<h1>{{gameState.value}}</h1>
+	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
+	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
+	<button (click)="sendMessage()">Send</button>
+</div>
+
+<h1>GAME STUFF</h1>
+<!-- Pick summoner -->
+<div *ngIf="gameState.value==2">
+	<input type="text" placeholder="Summoner Name" [(ngModel)]="summonerName"/>
+	<button (click)="sendGameSelect()">Load Deck</button>
+</div>
+<md-championpositioner></md-championpositioner>

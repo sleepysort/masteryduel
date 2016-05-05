@@ -23,7 +23,10 @@
                 packages: {
                     app: {
                         format: 'register',
-                        defaultExtension: 'js'
+                        defaultExtension: 'js',
+                        map: {
+                            'jquery': '/lib/jquery/dist/jquery.min.js'
+                        }
                     }
                 }
             });
