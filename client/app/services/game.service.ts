@@ -144,6 +144,10 @@ export class GameService {
 		return this.hand;
 	}
 
+	public getQueuedMove(): {uid: string, moveType: string} {
+		return this.queuedMove;
+	}
+
 	public addChampion(champ: I.ChampionData): void {
 		this.champStyles[champ.uid] = {
 			isActive: false
@@ -179,6 +183,39 @@ export class GameService {
 		}
 	}
 
+	public removeChampion(champ: I.ChampionData): void {
+		delete this.champStyles[champ.uid];
+		delete this.champDict[champ.uid]
+		this.activeChamps.splice(this.activeChamps.indexOf(champ), 1);
+
+		switch (champ.currentLocation) {
+			case I.Location.Hand:
+				this.activeChamps.splice(this.activeChamps.indexOf(champ), 1);
+				break;
+			case I.Location.LaneTop:
+				if (champ.owner === this.playerId) {
+					this.topLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+				} else {
+					this.topLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+				}
+				break;
+			case I.Location.LaneMid:
+				if (champ.owner === this.playerId) {
+					this.midLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+				} else {
+					this.midLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+				}
+				break;
+			case I.Location.LaneBot:
+				if (champ.owner === this.playerId) {
+					this.botLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+				} else {
+					this.botLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+				}
+				break;
+		}
+	}
+
 	public applyUpdate(update: I.DataGameUpdate): void {
 		if (update.moved) {
 			this.applyUpdateMove(update);
@@ -193,11 +230,11 @@ export class GameService {
 		}
 
 		if (update.damaged) {
-
+			this.applyUpdateDamaged(update);
 		}
 
 		if (update.killed) {
-
+			this.applyUpdateKilled(update);
 		}
 
 		if (update.nexus) {
@@ -230,6 +267,20 @@ export class GameService {
 	private applyUpdateEnemySpawn(update: I.DataGameUpdate): void {
 		for (let data of update.enemySpawn) {
 			this.addChampion(data);
+		}
+	}
+
+	private applyUpdateDamaged(update: I.DataGameUpdate): void {
+		for (let data of update.damaged) {
+			let champ = this.champDict[data.uid];
+			champ.health = data.health;
+		}
+	}
+
+	private applyUpdateKilled(update: I.DataGameUpdate): void {
+		for (let data of update.killed) {
+			let champ = this.champDict[data.uid];
+			this.removeChampion(champ);
 		}
 	}
 
@@ -292,27 +343,34 @@ export class GameService {
 		}
 	}
 
-	public registerChampionAttack(uid: string): void {
+	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {
 			console.log("Someone is already attacking");
-			return;
+			return false;
 		}
 		this.queuedMove = { uid: uid, moveType: "attack"};
 		this.setValidTargets();
+		this.champStyles[uid].isSource = true;
+		return true;
 	}
 
-	public registerChampionMove(uid: string): void {
+	public registerChampionMove(uid: string): boolean {
 		if (this.queuedMove) {
 			console.log("Someone is already moving");
-			return;
+			return false;
 		}
 		this.queuedMove = { uid: uid, moveType: "move"};
 		this.setValidTargets();
+		this.champStyles[uid].isSource = true;
+		return true;
 	}
 
 	public registerChampionClick(uid: string): void {
 		if (!this.queuedMove) {
 			console.log("No one is attacking");
+			return;
+		}
+		if (this.queuedMove.moveType !== "attack") {
 			return;
 		}
 
@@ -326,12 +384,16 @@ export class GameService {
 
 		this.send('gamemove', msg);
 		this.clearAllTargets();
+		this.champStyles[this.queuedMove.uid].isSource = false;
 		this.queuedMove = null;
 	}
 
 	public registerLaneClick(lane: string): void {
 		if (!this.queuedMove) {
 			console.log("No one is moving");
+			return;
+		}
+		if (this.queuedMove.moveType !== "move") {
 			return;
 		}
 
@@ -345,11 +407,15 @@ export class GameService {
 
 		this.send('gamemove', msg);
 		this.clearAllTargets();
+		this.champStyles[this.queuedMove.uid].isSource = false;
 		this.queuedMove = null;
 	}
 
 	public cancelMove(): void {
-		this.queuedMove = null;
+		if (this.queuedMove) {
+			this.champStyles[this.queuedMove.uid].isSource = false;
+			this.queuedMove = null;
+		}
 	}
 
 	private setValidTargets() {

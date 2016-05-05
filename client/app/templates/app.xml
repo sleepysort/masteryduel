@@ -1,6 +1,6 @@
 <img src="/public/img/bg.png" class="background" />
 
-<div>
+<div hidden>
 	<h1>{{gameState.value}}</h1>
 	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>

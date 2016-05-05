@@ -43,16 +43,33 @@ export class ChampionComponent implements OnInit {
 	}
 
 	public onAttackButtonClick(event: Event): void {
-		this.game.registerChampionAttack(this.champData.uid)
+		if (this.game.registerChampionAttack(this.champData.uid)) {
+			this.hideControls = true;
+		}
 		event.stopPropagation();
 	}
 
 	public onMoveButtonClick(event: Event): void {
-		this.game.registerChampionMove(this.champData.uid)
+		if (this.game.registerChampionMove(this.champData.uid)) {
+			this.hideControls = true;
+		}
 		event.stopPropagation();
 	}
 
-	public onCancelButtonClick(): void {
+	public onCancelButtonClick(event: Event): void {
 		this.game.cancelMove();
+		this.hideControls = true;
+		event.preventDefault();
+	}
+
+	public onChampionClick(event: Event): void {
+		if (this.game.getQueuedMove() && this.styles.isActive) {
+			this.game.registerChampionClick(this.champData.uid);
+		} else if (this.game.getQueuedMove && this.styles.isSource) {
+			this.toggleControls();
+		} else if (!this.game.getQueuedMove()) {
+			this.toggleControls();
+		}
+		event.stopPropagation();
 	}
 }

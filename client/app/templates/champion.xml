@@ -1,4 +1,4 @@
-<div *ngIf="champData" class="champion" (click)="toggleControls()">
+<div *ngIf="champData" class="champion" [class.selected]="!hideControls && !styles.isSource" [class.source]="styles.isSource" [class.active]="styles.isActive" (click)="onChampionClick($event)">
     <div class="champ-card">
         <img class="champ-image" src="{{champImgUrl}}"/>
         <img class="champ-border" src="/public/img/card-border.png" />
@@ -8,11 +8,15 @@
         <div>Health: {{champData.health}}</div>
         <div>Damage: {{champData.dmg}}</div>
     </div>
-    <div class="champ-mask" [hidden]="hideControls">
+    <div class="champ-mask" [hidden]="hideControls && !styles.isSource">
         <div class="champ-controls">
-            <button class="champ-control-btn" (click)="onAttackButtonClick($event)">Attack</button>
-            <button class="champ-control-btn" (click)="onMoveButtonClick($event)">Move</button>
-            <button class="champ-control-btn" (click)="onCancelButtonClick()">x</button>
+            <div *ngIf="!styles.isSource">
+                <button class="champ-control-btn" (click)="onAttackButtonClick($event)">Attack</button>
+                <button class="champ-control-btn" (click)="onMoveButtonClick($event)">Move</button>
+            </div>
+            <div *ngIf="styles.isSource">
+                <button class="champ-control-btn" (click)="onCancelButtonClick($event)">Cancel</button>
+            </div>
         </div>
     </div>
     <div class="champ-banner">

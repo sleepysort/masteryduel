@@ -11,6 +11,7 @@ export interface ChampionDto {
 
 export interface Style {
 	isActive: boolean;
+	isSource?: boolean;
 }
 
 export interface Wrapper<T> {
