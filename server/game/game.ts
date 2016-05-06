@@ -726,15 +726,14 @@ export class Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		this.uid = generator.generateId(8);
 		this.champId = champId;
-		this.champLevel = champLevel; this.owner = owner;
+		this.champLevel = champLevel;
 		this.owner = owner;
-		this.health = 5;
-		this.maxHealth = 5;
-		this.dmg = 3;
+		this.maxHealth = SC.getHealth(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
+		this.health = this.maxHealth;
+		this.dmg = SC.getDamage(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
-
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
 				game.getChamp(data.targetUid).stunnedTurn = game.getGameTurnNum() + 1;
