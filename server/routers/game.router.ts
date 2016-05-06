@@ -15,8 +15,12 @@ gameRouter.get('/new', (req: express.Request, res: express.Response) => {
 // Mounting the path with the angular code
 gameRouter.use('/app', express.static(path.resolve(constants.CLIENT_ROOT, 'app')));
 
-gameRouter.get('/:gameid', (req: express.Request, res: express.Response) => {
+gameRouter.get('/game.html', (req: express.Request, res: express.Response) => {
 	res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/index.html'));
+});
+
+gameRouter.get('/:gameid', (req: express.Request, res: express.Response) => {
+	res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/game.html'));
 });
 
 module.exports = gameRouter;
