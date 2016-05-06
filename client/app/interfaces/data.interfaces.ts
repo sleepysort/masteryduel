@@ -19,6 +19,7 @@ export interface ChampionData {
 	health: number;
 	maxHealth: number;
 	dmg: number;
+	ability: Ability;
 	currentLocation: Location;
 	stunnedTurn: number;
 	invulnTurn: number;
@@ -80,8 +81,10 @@ export interface DataGameMove {
 		targetLocation: Location;
 	};
 
-	/** Not yet implemented */
-	ability?: {};
+	ability?: {
+		sourceUid: string;
+		targetUid?: string;
+	};
 }
 
 export interface DataGameUpdate {
@@ -91,7 +94,46 @@ export interface DataGameUpdate {
 	hand?: ChampionData[];
 	enemySpawn?: ChampionData[];
 	moved?: { uid: string, location: Location }[];
+	affected?: { uid: string, status: Status }[];
 
 	turnNum: number;
 	turnPlayer: string;
+	moveCount: number;
+}
+
+/**
+* Representation of a champion ability
+*/
+export interface Ability {
+	readyTurn: number;  // cooldown; when game.turnNum >= readyTurn, ability can be used
+	name: string;
+	description: string;
+	type: AbilityType
+}
+
+export enum ChampionTag {
+	Fighter,
+	Mage,
+	Assassin,
+	Support,
+	Marksman,
+	Tank
+}
+
+export enum Status {
+	None,
+	Stunned,
+	Invulnerable
+}
+
+export enum AbilityType {
+	None,
+	Passive,
+	SingleEnemySameLane,
+	SingleEnemyAnyLane,
+	SingleAlly,
+	AOEEnemySameLane,
+	AOEAlly,
+	GlobalAlly,
+	GlobalEnemy
 }

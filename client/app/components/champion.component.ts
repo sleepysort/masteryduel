@@ -56,6 +56,13 @@ export class ChampionComponent implements OnInit {
 		event.stopPropagation();
 	}
 
+	public onAbilityButtonClick(event: Event): void {
+		if (this.game.registerChampionAbility(this.champData.uid)) {
+			this.hideControls = true;
+		}
+		event.stopPropagation();
+	}
+
 	public onCancelButtonClick(event: Event): void {
 		this.game.cancelMove();
 		this.hideControls = true;

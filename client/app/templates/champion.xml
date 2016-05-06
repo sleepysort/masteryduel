@@ -12,7 +12,10 @@
         <div class="champ-controls">
             <div *ngIf="!styles.isSource">
                 <button class="champ-control-btn" (click)="onAttackButtonClick($event)">Attack</button>
+                <br/>
                 <button class="champ-control-btn" (click)="onMoveButtonClick($event)">Move</button>
+                <br/>
+                <button class="champ-control-btn" (click)="onAbilityButtonClick($event)">Use Abiity</button>
             </div>
             <div *ngIf="styles.isSource">
                 <button class="champ-control-btn" (click)="onCancelButtonClick($event)">Cancel</button>

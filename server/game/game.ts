@@ -202,6 +202,13 @@ export class Game {
 	}
 
 
+	/**
+	* @return the champion with the given uid; null if not found
+	*/
+	public getChamp(uid: string) {
+		return this.activeChamps[uid];
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// Socket event listener helper methods
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,6 +262,13 @@ export class Game {
 	}
 
 	/**
+	* @return the turn number of the game
+	*/
+	public getGameTurnNum(): number {
+		return this.turnNum;
+	}
+
+	/**
 	* @return whether there are 0 players in the game
 	*/
 	public isGameEmpty(): boolean {
@@ -300,6 +314,7 @@ export class Game {
 		let opponent = this.getOpponent(move.playerId);
 
 		let update: I.DataGameUpdate = {
+			moveCount: -1,
 			turnNum: -1,
 			turnPlayer: null
 		};
@@ -355,8 +370,10 @@ export class Game {
 
 		update.turnNum = this.turnNum;
 		update.turnPlayer = this.getCurrentTurnPlayerId();
+		update.moveCount = this.movesCount;
 		opUpdate.turnNum = this.turnNum;
 		opUpdate.turnPlayer = this.getCurrentTurnPlayerId();
+		opUpdate.moveCount = this.movesCount;
 
 		// TODO: Instead of emitAll, process update so that each player only sees their own hand
 		player.getSocket().emit('gameupdate', update);
@@ -378,6 +395,10 @@ export class Game {
 
 		if (source.getLocation() === Location.Hand) {
 			throw new Error('Cannot attack from hand');
+		}
+
+		if (source.getStunnedTurn() >= this.turnNum) {
+			throw new Error('This champion is stunned.');
 		}
 
 		let opp = this.getOpponent(player.getId());
@@ -454,7 +475,26 @@ export class Game {
 	}
 
 	private tryAbility(player: Player, data: any, update: I.DataGameUpdate): void {
-		throw new Error('Abilities not yet supported');
+		let champ = this.activeChamps[data.sourceUid];
+
+		if (!champ) {
+			throw new Error('Invalid champion');
+		}
+
+		if (champ.getOwner() !== player.getId()) {
+			throw new Error('Cannot move opponent champion');
+		}
+
+		if (champ.getStunnedTurn() >= this.turnNum) {
+			throw new Error('This champion is stunned.');
+		}
+
+		if (champ.getAbility().readyTurn >= this.turnNum) {
+			throw new Error('Ability is on cooldown');
+		}
+
+		update.affected = [];
+		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
 	}
 
 	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): boolean {
@@ -482,6 +522,10 @@ export class Game {
 
 		if (champ.getLocation() !== Location.Hand && champ.getLocation() !== Location.LaneMid && data.targetLocation !== Location.LaneMid) {
 			throw new Error('Cannot move more than one lane over');
+		}
+
+		if (champ.getStunnedTurn() >= this.turnNum) {
+			throw new Error('This champion is stunned.');
 		}
 
 		update.moved = [];
@@ -689,6 +733,18 @@ export class Champion {
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
+
+		this.ability = {
+			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
+				game.getChamp(data.targetUid).stunnedTurn = game.getGameTurnNum() + 1;
+				update.affected.push({uid: data.targetUid, status: I.Status.Stunned});
+				return 5;
+			},
+			name: "Stun",
+			description: "Stuns an opponent for one turn.",
+			readyTurn: 0,
+			type: AbilityType.SingleEnemySameLane
+		}
 	}
 
 	/** Return true if enemy is killed */
@@ -697,8 +753,16 @@ export class Champion {
 		return enemy.health === 0;
 	}
 
+	public takeDamage(damage: number): void {
+		this.health -= Math.min(damage, this.health);
+	}
+
 	public getHealth(): number {
 		return this.health;
+	}
+
+	public getMaxHealth(): number {
+		return this.maxHealth;
 	}
 
 	public getDamage(): number {
@@ -736,14 +800,34 @@ export class Champion {
 	public getInvulnTurn(): number {
 		return this.invulnTurn;
 	}
+
+	public getAbility(): Ability {
+		return this.ability;
+	}
 }
 
 /**
 * Representation of a champion ability
 */
 export interface Ability {
-	effect: (context: any) => void;
+	/** Reference to the game, a target (if applicable, and the update object); returns the cooldown */
+	effect: (game: Game, data: any, update: any) => number;
 	readyTurn: number;  // cooldown; when game.turnNum >= readyTurn, ability can be used
+	name: string;
+	description: string;
+	type: AbilityType
+}
+
+export enum AbilityType {
+	None,
+	Passive,
+	SingleEnemySameLane,
+	SingleEnemyAnyLane,
+	SingleAlly,
+	AOEEnemySameLane,
+	AOEAlly,
+	GlobalAlly,
+	GlobalEnemy
 }
 
 /**

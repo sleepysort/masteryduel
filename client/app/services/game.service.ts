@@ -64,7 +64,7 @@ export class GameService {
 			});
 
 			this.sock.on('gameinit', (msg: I.DataGameInit) => {
-				console.log(msg.hand);
+				console.log(msg);
 				this.gameState.value = GameState.Started;
 				for (let i = 0; i < msg.hand.length; i++) {
 					this.addChampion(msg.hand[i]);
@@ -345,7 +345,7 @@ export class GameService {
 
 	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {
-			console.log("Someone is already attacking");
+			console.log("Someone is already moving");
 			return false;
 		}
 		this.queuedMove = { uid: uid, moveType: "attack"};
@@ -365,21 +365,56 @@ export class GameService {
 		return true;
 	}
 
+	public registerChampionAbility(uid: string): boolean {
+		if (this.queuedMove) {
+			console.log("Someone is already moving");
+			return false;
+		}
+
+		if (this.champDict[uid].ability.type === I.AbilityType.SingleEnemySameLane
+				|| this.champDict[uid].ability.type === I.AbilityType.SingleEnemyAnyLane
+				|| this.champDict[uid].ability.type === I.AbilityType.SingleAlly) {
+			this.queuedMove = { uid: uid, moveType: "ability"};
+			this.setValidTargets();
+			this.champStyles[uid].isSource = true;
+			return true;
+		} else {
+			let msg: I.DataGameMove = {
+				playerId: this.playerId,
+				ability: {
+					sourceUid: uid
+				}
+			}
+			this.send("gamemove", msg);
+			return false;
+		}
+	}
+
 	public registerChampionClick(uid: string): void {
 		if (!this.queuedMove) {
 			console.log("No one is attacking");
 			return;
 		}
-		if (this.queuedMove.moveType !== "attack") {
-			return;
-		}
 
-		let msg: I.DataGameMove = {
-			playerId: this.playerId,
-			attackChamp: {
-				sourceUid: this.queuedMove.uid,
-				targetUid: uid
+		let msg: I.DataGameMove;
+		if (this.queuedMove.moveType === "attack") {
+			msg = {
+				playerId: this.playerId,
+				attackChamp: {
+					sourceUid: this.queuedMove.uid,
+					targetUid: uid
+				}
 			}
+		} else if (this.queuedMove.moveType === "ability" ) {
+			msg = {
+				playerId: this.playerId,
+				ability: {
+					sourceUid: this.queuedMove.uid,
+					targetUid: uid
+				}
+			}
+		} else {
+			return;
 		}
 
 		this.send('gamemove', msg);
@@ -425,10 +460,37 @@ export class GameService {
 				break;
 			case "attack":
 				for (let i = 0; i < this.activeChamps.length; i++) {
-					let curr = this.activeChamps[i].uid;
-					if (this.champDict[this.queuedMove.uid].currentLocation === this.champDict[curr].currentLocation
-							&& this.champDict[curr].owner !== this.playerId) {
-						this.champStyles[this.activeChamps[i].uid].isActive = true;
+					let curr = this.activeChamps[i];
+					if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
+							&& curr.owner !== this.playerId) {
+						this.champStyles[curr.uid].isActive = true;
+					}
+				}
+				break;
+			case "ability":
+				let champ = this.champDict[this.queuedMove.uid];
+				if (champ.ability.type === I.AbilityType.SingleEnemySameLane) {
+					for (let i = 0; i < this.activeChamps.length; i++) {
+						let curr = this.activeChamps[i];
+						if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
+								&& curr.owner !== this.playerId) {
+							this.champStyles[curr.uid].isActive = true;
+						}
+					}
+				} else if (champ.ability.type === I.AbilityType.SingleEnemyAnyLane) {
+					for (let i = 0; i < this.activeChamps.length; i++) {
+						let curr = this.activeChamps[i];
+						if (curr.owner !== this.playerId) {
+							this.champStyles[curr.uid].isActive = true;
+						}
+					}
+				} else if (champ.ability.type === I.AbilityType.SingleAlly) {
+					for (let i = 0; i < this.activeChamps.length; i++) {
+						let curr = this.activeChamps[i];
+						if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
+								&& curr.owner === this.playerId) {
+							this.champStyles[curr.uid].isActive = true;
+						}
 					}
 				}
 				break;

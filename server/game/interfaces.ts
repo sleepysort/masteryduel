@@ -56,8 +56,10 @@ export interface DataGameMove {
 		targetLocation: g.Location;
 	};
 
-	/** Not yet implemented */
-	ability?: {};
+	ability?: {
+		sourceUid: string;
+		targetUid?: string;
+	};
 }
 
 export interface DataGameUpdate {
@@ -67,9 +69,11 @@ export interface DataGameUpdate {
 	hand?: g.Champion[];
 	enemySpawn?: g.Champion[];
 	moved?: { uid: string, location: g.Location }[];
+	affected?: { uid: string, status: Status }[];
 
 	turnNum: number;
 	turnPlayer: string;
+	moveCount: number;
 }
 
 /**
@@ -88,4 +92,10 @@ export enum ChampionTag {
 	Support,
 	Marksman,
 	Tank
+}
+
+export enum Status {
+	None,
+	Stunned,
+	Invulnerable
 }
