@@ -37,7 +37,7 @@ app.use('/lolapi', lolapiRouter);
  * Route to index
  */
 app.get('/', (req: express.Request, res: express.Response) => {
-    res.send("Home!");
+    res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/index.html'));
 });
 
 io.on('connection', (sock: SocketIO.Socket) => {

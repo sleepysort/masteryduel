@@ -16,7 +16,7 @@ gameRouter.get('/new', (req: express.Request, res: express.Response) => {
 gameRouter.use('/app', express.static(path.resolve(constants.CLIENT_ROOT, 'app')));
 
 gameRouter.get('/:gameid', (req: express.Request, res: express.Response) => {
-	res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/index.html'));
+	res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/game.html'));
 });
 
 module.exports = gameRouter;

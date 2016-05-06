@@ -1,49 +1,24 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
     <head>
-        <title></title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/public/css/master.css" type="text/css" />
-
-        <script src="/lib/jquery/dist/jquery.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw=" crossorigin="anonymous"></script>
-        <script src="/lib/socket.io-client/socket.io.js"></script>
-
-        <!-- IE required polyfills, in this exact order -->
-        <script src="/lib/es6-shim/es6-shim.min.js"></script>
-        <script src="/lib/systemjs/dist/system-polyfills.js"></script>
-        <script src="/lib/angular2/es6/dev/src/testing/shims_for_IE.js"></script>
-
-        <script src="/lib/angular2/bundles/angular2-polyfills.js"></script>
-        <script src="/lib/systemjs/dist/system.src.js"></script>
-        <script src="/lib/rxjs/bundles/Rx.js"></script>
-        <script src="/lib/angular2/bundles/angular2.dev.js"></script>
-        <script>
-            System.config({
-                packages: {
-                    app: {
-                        format: 'register',
-                        defaultExtension: 'js',
-                        map: {
-                            'jquery': '/lib/jquery/dist/jquery.min.js'
-                        }
-                    }
-                }
-            });
-            System.import('app/main')
-                .then(null, console.error.bind(console));
-        </script>
+        <meta charset="utf-8">
+        <title>Mastery Duel</title>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <link rel="stylesheet" href="public/css/index.css">
     </head>
     <body>
-        <md-app>
-            <!--Page Loader-->
-            <div class="PageLoaderContainer">
-                <div class="PageLoader">
-                    <div id="LoaderBar1"></div>
-                    <div id="LoaderBar2"></div>
-                    <div id="LoaderBar3"></div>
-                </div>
-            </div>
-        </md-app>
-    </body>
+      <div id="background">
+          <img src="public/img/Twisted-Fate.jpg" class="stretch" alt="" />
+      </div>
+      <div class="center">
+          <img id="title" src="public/img/Title.png"/>
+          <form action="/game/new">
+             <input class="button" type="submit" value="Quick Match">
+          </form>
+          <form action="/game/new">
+             <input class="button" type="submit" value="New Game">
+          </form>
+      </div>
 </html>
