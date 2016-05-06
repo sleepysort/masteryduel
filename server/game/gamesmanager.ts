@@ -1,6 +1,7 @@
 import generator = require('../util/generator');
 import g = require('./game');
 import Logger = require('../util/logger');
+import CT = require('./championtags');
 
 /**
 * Class to handle the game instances on the server
@@ -25,6 +26,8 @@ export class GamesManager {
 	/** DO NOT USE */
 	constructor() {
 		this.games = {};
+		Logger.log(Logger.Tag.System, "Loading champion tags.");
+		CT.ChampionTags.loadTags();
 	}
 
 	/**
