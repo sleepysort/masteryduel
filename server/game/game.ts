@@ -5,6 +5,7 @@ import constants = require('../constants');
 import I = require('./interfaces');
 import Logger = require('../util/logger');
 import CT = require('./championtags');
+import SC = require('./statcomputer');
 
 /**
 * Represents the various stages of the game
