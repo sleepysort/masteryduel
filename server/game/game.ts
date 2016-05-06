@@ -4,6 +4,7 @@ import gm = require('./gamesmanager');
 import constants = require('../constants');
 import I = require('./interfaces');
 import Logger = require('../util/logger');
+import CT = require('./championtags');
 
 /**
 * Represents the various stages of the game
@@ -670,6 +671,7 @@ export class Champion {
 	private champLevel: number;
 	private owner: string;
 	private health: number;
+	private maxHealth: number;
 	private dmg: number;
 	private ability: Ability;
 	private currentLocation: Location;
@@ -682,6 +684,7 @@ export class Champion {
 		this.champLevel = champLevel; this.owner = owner;
 		this.owner = owner;
 		this.health = 5;
+		this.maxHealth = 5;
 		this.dmg = 3;
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;

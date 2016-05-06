@@ -1,4 +1,3 @@
-import https = require('https');
 import Promise = require('promise');
 import request = require('request');
 import constants = require('../constants');

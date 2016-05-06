@@ -80,3 +80,12 @@ export interface ChampionMinData {
 	championId: number;
 	championLevel: number;
 }
+
+export enum ChampionTag {
+	Fighter,
+	Mage,
+	Assassin,
+	Support,
+	Marksman,
+	Tank
+}

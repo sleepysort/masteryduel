@@ -17,6 +17,7 @@ export interface ChampionData {
 	champLevel: number;
 	owner: string;
 	health: number;
+	maxHealth: number;
 	dmg: number;
 	currentLocation: Location;
 	stunnedTurn: number;
