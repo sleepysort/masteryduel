@@ -1,5 +1,5 @@
 import {Component, OnInit} from 'angular2/core';
-import {Dictionary, ChampionDto, GameState, Wrapper} from '../interfaces/interfaces';
+import {Dictionary, ChampionDto, GameState, Style, Wrapper} from '../interfaces/interfaces';
 import * as I from '../interfaces/data.interfaces';
 import {LolApiService} from '../services/lolapi.service';
 import {GameService} from '../services/game.service';
@@ -22,13 +22,14 @@ export class AppComponent implements OnInit {
 	public summonerName: string;
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
-	public inhibs: {uid: string};
+	public enemyInhibs: Style[];
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
 	public ngOnInit(): void {
 		this.gameState = this.game.getGameState();
 		this.playerNexusHealth = this.game.getPlayerNexusHealth()
+		this.enemyInhibs = this.game.getEnemyInhibStyles();
 	}
 
 	public sendMessage(): void {
@@ -44,8 +45,24 @@ export class AppComponent implements OnInit {
 	}
 
 
-	public onAttackInhib(event: Event): void {
-		this.game.registerNexusClick(this.inhibs.uid);
+	public onAttackTopInhib(event: Event): void {
+		if (this.game.getQueuedMove() && this.enemyInhibs[0].isActive) {
+			this.game.registerNexusClick(I.Location.LaneTop);
+		}
+		event.stopPropagation();
+	}
+
+	public onAttackMidInhib(event: Event): void {
+		if (this.game.getQueuedMove() && this.enemyInhibs[1].isActive) {
+			this.game.registerNexusClick(I.Location.LaneTop);
+		}
+		event.stopPropagation();
+	}
+
+	public onAttackBotInhib(event: Event): void {
+		if (this.game.getQueuedMove() && this.enemyInhibs[2].isActive) {
+			this.game.registerNexusClick(I.Location.LaneTop);
+		}
 		event.stopPropagation();
 	}
 }
