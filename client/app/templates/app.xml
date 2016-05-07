@@ -1,4 +1,6 @@
 <img src="/public/img/bg.png" class="background" />
+<img src="/public/img/NexusPlayer.png" id="nexus-player" />
+<img src="/public/img/NexusOpponent.png" id="nexus-opponent" />
 
 <div hidden>
 	<h1>{{gameState.value}}</h1>
@@ -7,7 +9,6 @@
 	<button (click)="sendMessage()">Send</button>
 </div>
 
-<h1>GAME STUFF</h1>
 <!-- Pick summoner -->
 <div *ngIf="gameState.value==2">
 	<input type="text" placeholder="Summoner Name" [(ngModel)]="summonerName"/>

@@ -12,24 +12,24 @@ export class StatComputer {
 
   private static getStatByTag(tag: I.ChampionTag, index: number): number {
     // baseHealth, healthScale, baseDmg, dmgScale
-    var stats = [12, 1.2, 3, 1.2];
+    var stats = [];
     if (tag === I.ChampionTag.Assassin) {
-      stats = [12, 1.1, 7, 1.4];
+      stats = [16, 1.1, 8, 1.4];
     }
     else if (tag === I.ChampionTag.Fighter) {
-      stats = [12, 1.1, 7, 1.4];
+      stats = [23, 1.4, 4, 1.2];
     }
     else if (tag === I.ChampionTag.Mage) {
-      stats = [12, 1.3, 6, 1.3];
+      stats = [15, 1.3, 5, 1.5];
     }
     else if (tag === I.ChampionTag.Marksman) {
-      stats = [10, 1.2, 5, 1.4];
+      stats = [15, 1.2, 7, 1.6];
     }
     else if (tag === I.ChampionTag.Support) {
-      stats = [14, 1.1, 1, 1.0];
+      stats = [20, 1.2, 2, 1.0];
     }
     else if (tag === I.ChampionTag.Tank) {
-      stats = [17, 1.5, 2, 1.1];
+      stats = [26, 1.5, 3, 1.1];
     }
     return stats[index];
   }

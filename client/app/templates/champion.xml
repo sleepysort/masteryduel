@@ -1,4 +1,4 @@
-<div *ngIf="champData" class="champion" [class.selected]="!hideControls && !styles.isSource" [class.source]="styles.isSource" [class.active]="styles.isActive" (click)="onChampionClick($event)">
+<div *ngIf="champData" class="champion" [class.selected]="styles.isControl && !styles.isSource" [class.source]="styles.isSource" [class.active]="styles.isActive" (click)="onChampionClick($event)">
     <div class="champ-name">{{champName}}</div>
     <div class="champ-card">
         <img class="champ-image" src="{{champImgUrl}}"/>
@@ -22,7 +22,7 @@
             </div>
         </div>
     </div>
-    <div class="champ-mask" [hidden]="hideControls && !styles.isSource">
+    <div class="champ-mask" [hidden]="!styles.isControl && !styles.isSource">
         <div class="champ-controls">
             <div *ngIf="!styles.isSource">
                 <button class="champ-control-btn" (click)="onAttackButtonClick($event)">Attack</button>

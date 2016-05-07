@@ -24,13 +24,10 @@ export class ChampionComponent implements OnInit {
 	public champImgUrl: string;
 	public styles: Style;
 
-	public hideControls: boolean;
-
 	constructor(private game: GameService, private lolapi: LolApiService) {
 	}
 
 	public ngOnInit(): void {
-		this.hideControls = true;
 		this.champName = this.lolapi.getChampionDtoById(this.champData.champId).name;
 		this.champImgUrl = this.lolapi.getChampionImageUrl(this.champData.champId);
 		this.styles = this.game.getChampStyle(this.champData.uid);
@@ -38,34 +35,38 @@ export class ChampionComponent implements OnInit {
 
 	public toggleControls(): void {
 		if (this.champData.owner === this.game.getPlayerId()) {
-			this.hideControls = !this.hideControls;
+			if (this.styles.isControl) {
+				this.game.unsetControlChamp(this.champData.uid);
+			} else {
+				this.game.setControlChamp(this.champData.uid);
+			}
 		}
 	}
 
 	public onAttackButtonClick(event: Event): void {
 		if (this.game.registerChampionAttack(this.champData.uid)) {
-			this.hideControls = true;
+			this.game.unsetControlChamp(this.champData.uid);
 		}
 		event.stopPropagation();
 	}
 
 	public onMoveButtonClick(event: Event): void {
 		if (this.game.registerChampionMove(this.champData.uid)) {
-			this.hideControls = true;
+			this.game.unsetControlChamp(this.champData.uid);
 		}
 		event.stopPropagation();
 	}
 
 	public onAbilityButtonClick(event: Event): void {
 		if (this.game.registerChampionAbility(this.champData.uid)) {
-			this.hideControls = true;
+			this.game.unsetControlChamp(this.champData.uid);
 		}
 		event.stopPropagation();
 	}
 
 	public onCancelButtonClick(event: Event): void {
 		this.game.cancelMove();
-		this.hideControls = true;
+		this.game.unsetControlChamp(this.champData.uid);
 		event.preventDefault();
 	}
 
