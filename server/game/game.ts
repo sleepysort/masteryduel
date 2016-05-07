@@ -788,7 +788,7 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion): boolean {
-		enemy.health -= Math.min(this.dmg, enemy.health);
+		enemy.takeDamage(this.dmg);
 		return enemy.health === 0;
 	}
 
