@@ -25,6 +25,8 @@ export class GameService {
 	private hand: I.ChampionData[];
 
 	private queuedMove: {uid: string, moveType: string};
+	private enemyNexusHealth: Wrapper<number>;
+	private playerNexusHealth: Wrapper<number>;
 
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
@@ -40,6 +42,8 @@ export class GameService {
 		this.champStyles = {};
 		this.laneStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
 		this.initializeSockets();
+		this.enemyNexusHealth = { value: -1 };
+		this.playerNexusHealth = { value: -1 };
 	}
 
 	private initializeSockets(): void {
@@ -65,10 +69,12 @@ export class GameService {
 
 			this.sock.on('gameinit', (msg: I.DataGameInit) => {
 				console.log(msg);
-				this.gameState.value = GameState.Started;
 				for (let i = 0; i < msg.hand.length; i++) {
 					this.addChampion(msg.hand[i]);
 				}
+				this.enemyNexusHealth.value = msg.nexusHealth;
+				this.enemyNexusHealth.value = msg.nexusHealth;
+				this.gameState.value = GameState.Started;
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
@@ -142,6 +148,14 @@ export class GameService {
 
 	public getHand(): I.ChampionData[] {
 		return this.hand;
+	}
+
+	public getEnemyNexusHealth(): Wrapper<number> {
+		return this.enemyNexusHealth;
+	}
+
+	public getPlayerNexusHealth(): Wrapper<number> {
+		return this.playerNexusHealth;
 	}
 
 	public getQueuedMove(): {uid: string, moveType: string} {

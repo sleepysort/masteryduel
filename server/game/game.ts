@@ -287,7 +287,8 @@ export class Game {
 			this.players[i].initializeHand(5, this.activeChamps);
 			this.players[i].getSocket().emit('gameinit', {
 				hand: this.getHand(this.players[i].getId()),
-				starter: this.getCurrentTurnPlayerId()
+				starter: this.getCurrentTurnPlayerId(),
+				nexusHealth: constants.NEXUS_STARTING_HEALTH
 			});
 		}
 	}
@@ -421,6 +422,8 @@ export class Game {
 			this.onGameOver(player);
 		}
 
+		source.movedNum = this.turnNum;
+
 		// Add data to update object
 		update.nexus = {};
 		update.nexus[opp.getId()] = opp.getHealth();
@@ -473,6 +476,7 @@ export class Game {
 				attacker: source.getUid()
 			});
 		}
+		source.movedNum = this.turnNum;
 	}
 
 	private tryAbility(player: Player, data: any, update: I.DataGameUpdate): void {
@@ -494,8 +498,13 @@ export class Game {
 			throw new Error('Ability is on cooldown');
 		}
 
+		if (champ.movedNum >= this.turnNum) {
+			throw new Error('Champion has already made a move this turn');
+		}
+
 		update.affected = [];
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
+		champ.movedNum = this.turnNum;
 	}
 
 	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): boolean {
@@ -517,6 +526,23 @@ export class Game {
 			throw new Error('Cannot move champion to hand');
 		}
 
+		if (champ.movedNum >= this.turnNum) {
+			throw new Error('Champion has already move this turn');
+		}
+
+		if (champ.getLocation() === Location.Hand) {
+			let count = 0;
+			for (let key in this.activeChamps) {
+				if (this.activeChamps[key].getLocation() !== Location.Hand
+						&& this.activeChamps[key].getOwner() === player.getId()) {
+					count++;
+				}
+			}
+			if (count == 5) {
+				throw new Error('Cannot have more than 5 champions out at a time.');
+			}
+		}
+
 		if (data.targetLocation === Location.JungleTop || data.targetLocation === Location.JungleBot) {
 			throw new Error('Jungles not yet implemented')
 		}
@@ -532,6 +558,8 @@ export class Game {
 		update.moved = [];
 
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
+
+		champ.movedNum = this.turnNum;
 
 		champ.setLocation(data.targetLocation);
 		update.moved.push({
@@ -722,7 +750,8 @@ export class Champion {
 	private currentLocation: Location;
 	private stunnedTurn: number;
 	private invulnTurn: number;
-	private hasMoved: boolean;
+
+	public movedNum: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		this.uid = generator.generateId(8);
@@ -735,7 +764,6 @@ export class Champion {
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
-		this.hasMoved = false;
 
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {

@@ -57,6 +57,7 @@ export interface DataGameSelectAck {
 export interface DataGameInit {
 	hand: ChampionData[];
 	starter: string;
+	nexusHealth: number;
 }
 
 export interface DataGameMove {
