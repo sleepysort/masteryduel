@@ -1,12 +1,16 @@
-<!--<img src="/public/img/bg.png" class="background" />-->
+<img src="/public/img/bg.png" class="background" />
 <div hidden>
 	<h1>{{gameState.value}}</h1>
 	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
 	<button (click)="sendMessage()">Send</button>
 </div>
+<div>
 	<img src="/public/img/NexusRed.png" class="nexus-opponent" />
+</div>
+<div>
 	<img src="/public/img/NexusBlue.png" class="nexus-player" />
+</div>
 <div class="player-health">
 	Nexus Health: {{playerNexusHealth.value}}
 </div>
