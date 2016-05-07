@@ -1,22 +1,12 @@
-<img src="/public/img/bg.png" class="background" />
+<!--<img src="/public/img/bg.png" class="background" />-->
 <div hidden>
 	<h1>{{gameState.value}}</h1>
 	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
 	<button (click)="sendMessage()">Send</button>
 </div>
-<div>
 	<img src="/public/img/NexusRed.png" class="nexus-opponent" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-top" (click)="onAttackInhib($event)" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-mid" (click)="onAttackInhib($event)" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-bot" (click)="onAttackInhib($event)" />
-</div>
-<div>
 	<img src="/public/img/NexusBlue.png" class="nexus-player" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-top" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-mid" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-bot" />
-</div>
 <div class="player-health">
 	Nexus Health: {{playerNexusHealth.value}}
 </div>

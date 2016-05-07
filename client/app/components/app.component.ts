@@ -1,5 +1,5 @@
 import {Component, OnInit} from 'angular2/core';
-import {Dictionary, ChampionDto, GameState, Wrapper} from '../interfaces/interfaces';
+import {Dictionary, ChampionDto, GameState, Style, Wrapper} from '../interfaces/interfaces';
 import * as I from '../interfaces/data.interfaces';
 import {LolApiService} from '../services/lolapi.service';
 import {GameService} from '../services/game.service';
@@ -22,7 +22,6 @@ export class AppComponent implements OnInit {
 	public summonerName: string;
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
-	public inhibs: {uid: string};
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
@@ -43,9 +42,4 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
-
-	public onAttackInhib(event: Event): void {
-		this.game.registerNexusClick(this.inhibs.uid);
-		event.stopPropagation();
-	}
 }

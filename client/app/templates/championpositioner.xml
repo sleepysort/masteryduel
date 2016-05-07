@@ -1,31 +1,54 @@
 <div class="champion-positioner">
-	<div class="hand-container">
-		<md-champion *ngFor="let champ of hand" [champData]="champ"></md-champion>
-	</div>
 	<div class="lane-container">
 		<div class="lane-top" [class.active]="topLaneStyles.isActive" (click)="onTopLaneClicked()">
+			<div class="lane-opponent-structs">
+				<img src="/public/img/InhibRed.png" class="inhib-opponent" [class.active]="enemyInhibs[0].isActive" (click)="onAttackTopInhib($event)" />
+			</div>
 			<div class="lane-enemy">
 				<md-champion *ngFor="let champ of topLaneEnemies" [champData]="champ"></md-champion>
 			</div>
 			<div class="lane-ally">
 				<md-champion *ngFor="let champ of topLaneAllies" [champData]="champ"></md-champion>
 			</div>
+			<div class="lane-ally-structs">
+				<img src="/public/img/InhibBlue.png" class="inhib-player" />
+			 </div>
 		</div>
 		<div class="lane-mid" [class.active]="midLaneStyles.isActive" (click)="onMidLaneClicked()">
+			<div class="lane-opponent-structs">
+				<img src="/public/img/InhibRed.png" class="inhib-opponent" [class.active]="enemyInhibs[1].isActive" (click)="onAttackMidInhib($event)" />
+			</div>
 			<div class="lane-enemy">
 				<md-champion *ngFor="let champ of midLaneEnemies" [champData]="champ"></md-champion>
 			</div>
 			<div class="lane-ally">
 				<md-champion *ngFor="let champ of midLaneAllies" [champData]="champ"></md-champion>
 			</div>
+			<div class="lane-ally-structs">
+				<img src="/public/img/InhibBlue.png" class="inhib-player" />
+			</div>
 		</div>
 		<div class="lane-bot" [class.active]="botLaneStyles.isActive" (click)="onBotLaneClicked()">
+			<div class="lane-opponent-structs">
+				<img src="/public/img/InhibRed.png" class="inhib-opponent" [class.active]="enemyInhibs[2].isActive" (click)="onAttackBotInhib($event)" />
+			</div>
 			<div class="lane-enemy">
 				<md-champion *ngFor="let champ of botLaneEnemies" [champData]="champ"></md-champion>
 			</div>
 			<div class="lane-ally">
 				<md-champion *ngFor="let champ of botLaneAllies" [champData]="champ"></md-champion>
 			</div>
+			<div class="lane-ally-structs">
+				<img src="/public/img/InhibBlue.png" class="inhib-player" />
+			</div>
+		</div>
+	</div>
+	<div class="drawer" [class.drawer-opened]="isDrawerOpen">
+		<div class="drawer-toggle-btn" (click)="onDrawerButtonClicked($event)">
+			<img src="/public/img/caret.png" />
+		</div>
+		<div class="hand-container">
+			<md-champion *ngFor="let champ of hand" [champData]="champ"></md-champion>
 		</div>
 	</div>
 </div>

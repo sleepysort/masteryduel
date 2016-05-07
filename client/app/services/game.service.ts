@@ -2,19 +2,19 @@ import {Injectable} from 'angular2/core';
 import {ChampionDto, Dictionary, GameState, Style, Wrapper} from '../interfaces/interfaces';
 import * as I from '../interfaces/data.interfaces';
 import {ChampionHelper} from '../helpers/champion.helper';
+import {MessageLogger} from '../helpers/messagelogger';
 
 @Injectable()
 export class GameService {
 	private sock: SocketIOClient.Socket;
 	private playerId: string;
-	private playerHealth: number;
 	private gameId: string;
 	private gameState: Wrapper<GameState>;
 	private turnNum: Wrapper<number>;
 	private activeChamps: I.ChampionData[];
 	private champDict: Dictionary<I.ChampionData>;
 	private champStyles: Dictionary<Style>;
-	private inhibs: Dictionary<Style>;
+	private enemyInhibStyles: Style[];
 	private currentPlayerId: string;
 	private laneStyles: Style[];
 
@@ -49,8 +49,8 @@ export class GameService {
 		this.hand = [];
 		this.champDict = {};
 		this.champStyles = {};
-		this.inhibs = {};
 		this.laneStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
+		this.enemyInhibStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
 		this.initializeSockets();
 		this.enemyNexusHealth = { value: 5 };
 		this.playerNexusHealth = { value: 5 };
@@ -78,11 +78,22 @@ export class GameService {
 				console.log(msg);
 			});
 
+			this.sock.on('gamechat', (msg: I.DataGameChat) => {
+				if (msg.playerId === this.playerId) {
+					MessageLogger.playerChatMessage(msg.text);
+				} else {
+					MessageLogger.opponentChatMessage(msg.text);
+				}
+			});
+
 			this.sock.on('gameinit', (msg: I.DataGameInit) => {
 				console.log(msg);
 				for (let i = 0; i < msg.hand.length; i++) {
 					this.addChampion(msg.hand[i]);
 				}
+
+				MessageLogger.systemMessage('The game is starting!');
+
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.gameState.value = GameState.Started;
@@ -134,10 +145,6 @@ export class GameService {
 		return this.champStyles[uid];
 	}
 
-	public getInhib(uid: string): Style {
-		return this.inhibs[uid];
-	}
-
 	public getTopLaneAllies(): I.ChampionData[] {
 		return this.topLaneAllies;
 	}
@@ -164,6 +171,10 @@ export class GameService {
 
 	public getLaneStyles(i: number): Style {
 		return this.laneStyles[i];
+	}
+
+	public getEnemyInhibStyles(): Style[] {
+		return this.enemyInhibStyles;
 	}
 
 	public getHand(): I.ChampionData[] {
@@ -423,52 +434,6 @@ export class GameService {
 		}
 	}
 
-	public registerNexusAttack(uid: string): boolean {
-		if (this.queuedMove) {
-			console.log("Someone is already moving");
-			return false;
-		}
-
-		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
-			console.log("This champion is stunned.");
-			return false;
-		}
-
-		if (this.champDict[uid].movedNum >= this.turnNum.value) {
-			console.log("This champion has already made a move this turn.");
-			return false;
-		}
-
-		this.queuedMove = { uid: uid, moveType: "attack"};
-		return true;
-	}
-
-	public registerNexusClick(uid: string): void {
-		if (!this.queuedMove) {
-			console.log("No one is attacking");
-			return;
-		}
-
-		let msg: I.DataGameMove;
-		for (let i = 0; i < this.activeChamps.length; i++) {
-			let curr = this.activeChamps[i];
-			if (!(this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
-					&& curr.owner !== this.playerId)) {
-				this.inhibs[curr.uid].isActive = true;
-				if (this.queuedMove.moveType === "attack") {
-					msg = {
-						playerId: this.playerId
-					}
-				}
-			} else {
-				this.inhibs[curr.uid].isActive = false;
-			}
-		}
-
-		this.send('gamemove', msg);
-		this.queuedMove = null;
-	}
-
 
 	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {
@@ -577,6 +542,29 @@ export class GameService {
 		this.queuedMove = null;
 	}
 
+	public registerNexusClick(location: I.Location): void {
+		if (!this.queuedMove) {
+			console.log("No one is attacking");
+			return;
+		}
+
+		if (this.queuedMove.moveType !== "attack") {
+			return;
+		}
+
+		let msg: I.DataGameMove = {
+			playerId: this.playerId,
+			attackNexus: {
+				uid: this.queuedMove.uid,
+			}
+		};
+
+		this.send('gamemove', msg);
+		this.clearAllTargets();
+		this.champStyles[this.queuedMove.uid].isSource = false;
+		this.queuedMove = null;
+	}
+
 	public registerLaneClick(lane: string): void {
 		if (!this.queuedMove) {
 			console.log("No one is moving");
@@ -626,13 +614,18 @@ export class GameService {
 				}
 				break;
 			case "attack":
+				let enemyInLane = false;
 				for (let i = 0; i < this.activeChamps.length; i++) {
 					let curr = this.activeChamps[i];
 					if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
 							&& curr.owner !== this.playerId
 							&& curr.invulnTurn < this.turnNum.value) {
 						this.champStyles[curr.uid].isActive = true;
+						enemyInLane = true;
 					}
+				}
+				if (!enemyInLane) {
+					this.enemyInhibStyles[this.champDict[this.queuedMove.uid].currentLocation - 2].isActive = true;
 				}
 				break;
 			case "ability":
