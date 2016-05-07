@@ -21,11 +21,14 @@ export class AppComponent implements OnInit {
 	public sockData: string;
 	public summonerName: string;
 	public gameState: Wrapper<GameState>;
+	public playerNexusHealth: Wrapper<number>;
+	public inhibs: {uid: string};
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
 	public ngOnInit(): void {
 		this.gameState = this.game.getGameState();
+		this.playerNexusHealth = this.game.getPlayerNexusHealth()
 	}
 
 	public sendMessage(): void {
@@ -38,5 +41,11 @@ export class AppComponent implements OnInit {
 			summonerName: this.summonerName
 		}
 		this.game.send('gameselect', msg);
+	}
+
+
+	public onAttackInhib(event: Event): void {
+		this.game.registerNexusClick(this.inhibs.uid);
+		event.stopPropagation();
 	}
 }

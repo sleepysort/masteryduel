@@ -696,7 +696,7 @@ export class Player {
 	* @return the player's health
 	*/
 	public getHealth(): number {
-		return this.health;
+		return
 	}
 
 	/**
@@ -712,7 +712,8 @@ export class Player {
 	* @returns whether the player has been defeated
 	*/
 	public applyDamage(dmg: number): boolean {
-		this.health -= Math.min(dmg, this.health);
+		//this.health -= Math.min(dmg, this.health);
+		this.health -= 1;
 		return this.health === 0;
 	}
 

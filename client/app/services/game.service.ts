@@ -14,6 +14,7 @@ export class GameService {
 	private activeChamps: I.ChampionData[];
 	private champDict: Dictionary<I.ChampionData>;
 	private champStyles: Dictionary<Style>;
+	private inhibs: Dictionary<Style>;
 	private currentPlayerId: string;
 	private laneStyles: Style[];
 
@@ -48,10 +49,11 @@ export class GameService {
 		this.hand = [];
 		this.champDict = {};
 		this.champStyles = {};
+		this.inhibs = {};
 		this.laneStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
 		this.initializeSockets();
-		this.enemyNexusHealth = { value: -1 };
-		this.playerNexusHealth = { value: -1 };
+		this.enemyNexusHealth = { value: 5 };
+		this.playerNexusHealth = { value: 5 };
 		this.controlChampId = null;
 	}
 
@@ -130,6 +132,10 @@ export class GameService {
 
 	public getChampStyle(uid: string): Style {
 		return this.champStyles[uid];
+	}
+
+	public getInhib(uid: string): Style {
+		return this.inhibs[uid];
 	}
 
 	public getTopLaneAllies(): I.ChampionData[] {
@@ -291,7 +297,7 @@ export class GameService {
 		}
 
 		if (update.nexus) {
-
+			this.applyUpdateNexus(update);
 		}
 
 		this.champDict[update.sourceUid].movedNum = update.movedNum;
@@ -354,6 +360,10 @@ export class GameService {
 		}
 	}
 
+	private applyUpdateNexus(update: I.DataGameUpdate): void {
+		this.playerNexusHealth.value = update.nexus[this.playerId];
+	}
+
 	public addAllyToLane(champ: I.ChampionData, lane: I.Location) {
 		switch(lane) {
 			case I.Location.LaneTop:
@@ -412,6 +422,53 @@ export class GameService {
 				break;
 		}
 	}
+
+	public registerNexusAttack(uid: string): boolean {
+		if (this.queuedMove) {
+			console.log("Someone is already moving");
+			return false;
+		}
+
+		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
+			console.log("This champion is stunned.");
+			return false;
+		}
+
+		if (this.champDict[uid].movedNum >= this.turnNum.value) {
+			console.log("This champion has already made a move this turn.");
+			return false;
+		}
+
+		this.queuedMove = { uid: uid, moveType: "attack"};
+		return true;
+	}
+
+	public registerNexusClick(uid: string): void {
+		if (!this.queuedMove) {
+			console.log("No one is attacking");
+			return;
+		}
+
+		let msg: I.DataGameMove;
+		for (let i = 0; i < this.activeChamps.length; i++) {
+			let curr = this.activeChamps[i];
+			if (!(this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
+					&& curr.owner !== this.playerId)) {
+				this.inhibs[curr.uid].isActive = true;
+				if (this.queuedMove.moveType === "attack") {
+					msg = {
+						playerId: this.playerId
+					}
+				}
+			} else {
+				this.inhibs[curr.uid].isActive = false;
+			}
+		}
+
+		this.send('gamemove', msg);
+		this.queuedMove = null;
+	}
+
 
 	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {

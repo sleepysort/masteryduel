@@ -18,16 +18,69 @@ body {
     position: fixed;
     transform: translateY(-50%) scale(0.25);
     top: 80%;
-    left: 27%;
-    z-index: 0;
+    left: 71%;
+    z-index: -1;
+}
+
+.inhib-player-top {
+    position: fixed;
+    top: 70%;
+    left: 22.5%;
+    z-index: -1;
+}
+
+.inhib-player-mid {
+    position: fixed;
+    top: 70%;
+    left: 45%;
+    z-index: -1;
+}
+
+.inhib-player-bot {
+    position: fixed;
+    top: 70%;
+    left: 70%;
+    z-index: -1;
 }
 
 .nexus-opponent {
     position: fixed;
     transform: translateY(-50%) scale(0.25);
-    top: 0%;
-    left: 27%;
-    z-index: 0;
+    top: 1%;
+    left: -17%;
+    z-index: -1;
+}
+
+.inhib-opponent-top {
+    position: fixed;
+    top: -10%;
+    left: 22.5%;
+    z-index: -1;
+}
+
+.inhib-opponent-mid {
+    position: fixed;
+    top: -10%;
+    left: 45%;
+    z-index: -1;
+}
+
+.inhib-opponent-bot {
+    position: fixed;
+    top: -10%;
+    left: 70%;
+    z-index: -1;
+}
+
+.player-health {
+    position: fixed;
+    top: 65%;
+    left: 89.5%;
+    color: white
+}
+
+.inhib.active {
+    cursor: url('/public/img/CursorAttack.cur'), pointer;
 }
 
 md-champion {
