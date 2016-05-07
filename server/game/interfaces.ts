@@ -64,13 +64,17 @@ export interface DataGameMove {
 }
 
 export interface DataGameUpdate {
+	sourceUid: string;
 	nexus?: {[playerId: string]: number};
 	killed?: { uid: string, killer: string }[];
 	damaged?: { uid: string, health: number, attacker: string }[];
 	hand?: g.Champion[];
 	enemySpawn?: g.Champion[];
 	moved?: { uid: string, location: g.Location }[];
-	affected?: { uid: string, status: Status }[];
+	affected?: { uid: string, status: Status, turnNum: number }[];
+
+	/** The turn number of the champion */
+	movedNum?: number;
 
 	turnNum: number;
 	turnPlayer: string;

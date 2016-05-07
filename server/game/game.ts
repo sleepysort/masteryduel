@@ -316,6 +316,7 @@ export class Game {
 		let opponent = this.getOpponent(move.playerId);
 
 		let update: I.DataGameUpdate = {
+			sourceUid: null,
 			moveCount: -1,
 			turnNum: -1,
 			turnPlayer: null
@@ -377,7 +378,6 @@ export class Game {
 		opUpdate.turnPlayer = this.getCurrentTurnPlayerId();
 		opUpdate.moveCount = this.movesCount;
 
-		// TODO: Instead of emitAll, process update so that each player only sees their own hand
 		player.getSocket().emit('gameupdate', update);
 		opponent.getSocket().emit('gameupdate', opUpdate);
 	}
@@ -394,6 +394,7 @@ export class Game {
 
 	private tryAttackNexus(player: Player, data: any, update: I.DataGameUpdate): void {
 		let source = this.activeChamps[data.uid];
+		update.sourceUid = source.getUid();
 
 		if (source.getLocation() === Location.Hand) {
 			throw new Error('Cannot attack from hand');
@@ -423,6 +424,7 @@ export class Game {
 		}
 
 		source.movedNum = this.turnNum;
+		update.movedNum = source.movedNum;
 
 		// Add data to update object
 		update.nexus = {};
@@ -432,6 +434,7 @@ export class Game {
 	private tryAttackChamp(player: Player, data: any, update: I.DataGameUpdate): void {
 		let source = this.activeChamps[data.sourceUid];
 		let target = this.activeChamps[data.targetUid];
+		update.sourceUid = source.getUid();
 
 		if (!source || !target) {
 			throw new Error('Invalid source or target');
@@ -477,10 +480,12 @@ export class Game {
 			});
 		}
 		source.movedNum = this.turnNum;
+		update.movedNum = source.movedNum;
 	}
 
 	private tryAbility(player: Player, data: any, update: I.DataGameUpdate): void {
 		let champ = this.activeChamps[data.sourceUid];
+		update.sourceUid = champ.getUid();
 
 		if (!champ) {
 			throw new Error('Invalid champion');
@@ -505,10 +510,12 @@ export class Game {
 		update.affected = [];
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
 		champ.movedNum = this.turnNum;
+		update.movedNum = champ.movedNum;
 	}
 
 	private tryMoveChamp(player: Player, data: any, update: I.DataGameUpdate): boolean {
 		let champ = this.activeChamps[data.uid];
+		update.sourceUid = champ.getUid();
 
 		if (!champ) {
 			throw new Error('Invalid champion');
@@ -560,6 +567,7 @@ export class Game {
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.movedNum = this.turnNum;
+		update.movedNum = champ.movedNum;
 
 		champ.setLocation(data.targetLocation);
 		update.moved.push({
@@ -572,6 +580,7 @@ export class Game {
 
 	public tryHandAndSpawn(player: Player, data: any, update: I.DataGameUpdate, opUpdate: I.DataGameUpdate) {
 		let champ = this.activeChamps[data.uid];
+		update.sourceUid = champ.getUid();
 
 		if (!champ) {
 			throw new Error('Invalid champion');
@@ -767,8 +776,9 @@ export class Champion {
 
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
-				game.getChamp(data.targetUid).stunnedTurn = game.getGameTurnNum() + 1;
-				update.affected.push({uid: data.targetUid, status: I.Status.Stunned});
+				let enemy = game.getChamp(data.targetUid);
+				enemy.stunnedTurn = game.getGameTurnNum() + 1;
+				update.affected.push({uid: data.targetUid, status: I.Status.Stunned, turnNum: enemy.stunnedTurn});
 				return 5;
 			},
 			name: "Stun",

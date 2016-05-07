@@ -16,7 +16,11 @@ gameRouter.get('/new', (req: express.Request, res: express.Response) => {
 gameRouter.use('/app', express.static(path.resolve(constants.CLIENT_ROOT, 'app')));
 
 gameRouter.get('/:gameid', (req: express.Request, res: express.Response) => {
-	res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/game.html'));
+	if (gamesManager.hasGame(req.params['gameid'])) {
+		res.sendFile(path.join(constants.PUBLIC_ROOT, '/views/game.html'));
+	} else {
+		res.sendStatus(404);
+	}
 });
 
 module.exports = gameRouter;

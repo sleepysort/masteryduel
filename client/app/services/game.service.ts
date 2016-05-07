@@ -9,6 +9,7 @@ export class GameService {
 	private playerId: string;
 	private gameId: string;
 	private gameState: Wrapper<GameState>;
+	private turnNum: Wrapper<number>;
 	private activeChamps: I.ChampionData[];
 	private champDict: Dictionary<I.ChampionData>;
 	private champStyles: Dictionary<Style>;
@@ -27,12 +28,15 @@ export class GameService {
 	private queuedMove: {uid: string, moveType: string};
 	private enemyNexusHealth: Wrapper<number>;
 	private playerNexusHealth: Wrapper<number>;
+	private currentTurnPlayer: Wrapper<string>;
+	private currentTurnMovesLeft: Wrapper<number>;
 
 	/** Champion that is currently clicked to show controls */
 	private controlChampId: string;
 
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
+		this.turnNum = { value: 0 };
 		this.activeChamps = [];
 		this.topLaneAllies = [];
 		this.midLaneAllies = [];
@@ -79,6 +83,7 @@ export class GameService {
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.gameState.value = GameState.Started;
+				this.turnNum.value = 1;
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
@@ -104,6 +109,10 @@ export class GameService {
 
 	public getGameState(): Wrapper<GameState> {
 		return this.gameState;
+	}
+
+	public getCurrentTurnNum(): Wrapper<number> {
+		return this.turnNum;
 	}
 
 	public getActiveChamps(): I.ChampionData[] {
@@ -160,6 +169,14 @@ export class GameService {
 
 	public getPlayerNexusHealth(): Wrapper<number> {
 		return this.playerNexusHealth;
+	}
+
+	public getCurrentTurnPlayer(): Wrapper<string> {
+		return this.currentTurnPlayer;
+	}
+
+	public getCurrentTurnMovesLeft(): Wrapper<number> {
+		return this.currentTurnMovesLeft;
 	}
 
 	public getQueuedMove(): {uid: string, moveType: string} {
@@ -268,9 +285,16 @@ export class GameService {
 			this.applyUpdateKilled(update);
 		}
 
+		if (update.affected) {
+			this.applyUpdateAffected(update);
+		}
+
 		if (update.nexus) {
 
 		}
+
+		this.champDict[update.sourceUid].movedNum = update.movedNum;
+		this.turnNum.value = update.turnNum;
 	}
 
 	private applyUpdateMove(update: I.DataGameUpdate):void {
@@ -312,6 +336,20 @@ export class GameService {
 		for (let data of update.killed) {
 			let champ = this.champDict[data.uid];
 			this.removeChampion(champ);
+		}
+	}
+
+	private applyUpdateAffected(update: I.DataGameUpdate): void {
+		for (let data of update.affected) {
+			let champ = this.champDict[data.uid];
+			switch (data.status) {
+				case I.Status.Stunned:
+					champ.stunnedTurn = data.turnNum;
+					break;
+				case I.Status.Invulnerable:
+					champ.invulnTurn = data.turnNum;
+					break;
+			}
 		}
 	}
 
@@ -379,6 +417,17 @@ export class GameService {
 			console.log("Someone is already moving");
 			return false;
 		}
+
+		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
+			console.log("This champion is stunned.");
+			return false;
+		}
+
+		if (this.champDict[uid].movedNum >= this.turnNum.value) {
+			console.log("This champion has already made a move this turn.");
+			return false;
+		}
+
 		this.queuedMove = { uid: uid, moveType: "attack"};
 		this.setValidTargets();
 		this.champStyles[uid].isSource = true;
@@ -390,6 +439,17 @@ export class GameService {
 			console.log("Someone is already moving");
 			return false;
 		}
+
+		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
+			console.log("This champion is stunned.");
+			return false;
+		}
+
+		if (this.champDict[uid].movedNum >= this.turnNum.value) {
+			console.log("This champion has already made a move this turn.");
+			return false;
+		}
+
 		this.queuedMove = { uid: uid, moveType: "move"};
 		this.setValidTargets();
 		this.champStyles[uid].isSource = true;
@@ -399,6 +459,11 @@ export class GameService {
 	public registerChampionAbility(uid: string): boolean {
 		if (this.queuedMove) {
 			console.log("Someone is already moving");
+			return false;
+		}
+
+		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
+			console.log("This champion is stunned.");
 			return false;
 		}
 
@@ -487,35 +552,51 @@ export class GameService {
 	private setValidTargets() {
 		switch (this.queuedMove.moveType) {
 			case "move":
-				this.laneStyles.forEach(s => s.isActive = true);
+				let champLoc = this.champDict[this.queuedMove.uid].currentLocation;
+				switch (champLoc) {
+					case I.Location.Hand:
+						this.laneStyles.forEach(s => s.isActive = true);
+						break;
+					case I.Location.LaneTop:
+					case I.Location.LaneBot:
+						this.laneStyles[1].isActive = true;
+						break;
+					case I.Location.LaneMid:
+						this.laneStyles[0].isActive = true;
+						this.laneStyles[2].isActive = true;
+						break;
+				}
 				break;
 			case "attack":
 				for (let i = 0; i < this.activeChamps.length; i++) {
 					let curr = this.activeChamps[i];
 					if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
-							&& curr.owner !== this.playerId) {
+							&& curr.owner !== this.playerId
+							&& curr.invulnTurn < this.turnNum.value) {
 						this.champStyles[curr.uid].isActive = true;
 					}
 				}
 				break;
 			case "ability":
-				let champ = this.champDict[this.queuedMove.uid];
-				if (champ.ability.type === I.AbilityType.SingleEnemySameLane) {
+				let champAbility = this.champDict[this.queuedMove.uid].ability;
+				if (champAbility.type === I.AbilityType.SingleEnemySameLane) {
 					for (let i = 0; i < this.activeChamps.length; i++) {
 						let curr = this.activeChamps[i];
 						if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
-								&& curr.owner !== this.playerId) {
+								&& curr.owner !== this.playerId
+								&& curr.invulnTurn < this.turnNum.value) {
 							this.champStyles[curr.uid].isActive = true;
 						}
 					}
-				} else if (champ.ability.type === I.AbilityType.SingleEnemyAnyLane) {
+				} else if (champAbility.type === I.AbilityType.SingleEnemyAnyLane) {
 					for (let i = 0; i < this.activeChamps.length; i++) {
 						let curr = this.activeChamps[i];
-						if (curr.owner !== this.playerId) {
+						if (curr.owner !== this.playerId
+								&& curr.invulnTurn < this.turnNum.value) {
 							this.champStyles[curr.uid].isActive = true;
 						}
 					}
-				} else if (champ.ability.type === I.AbilityType.SingleAlly) {
+				} else if (champAbility.type === I.AbilityType.SingleAlly) {
 					for (let i = 0; i < this.activeChamps.length; i++) {
 						let curr = this.activeChamps[i];
 						if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation

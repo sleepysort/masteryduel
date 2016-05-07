@@ -4,6 +4,7 @@ import constants = require('../constants');
 
 export function getSummonerId(name: string): Promise.IThenable<number> {
 	return new Promise((resolve, reject) => {
+		name = name.replace(/ /g, '');
 		let reqUrl = constants.LOL_API_URL + '/api/lol/na/v1.4/summoner/by-name/' + name + '?' + constants.LOL_API_KEY;
 		let options = {
 			uri: reqUrl,

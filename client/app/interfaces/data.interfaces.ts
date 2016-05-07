@@ -23,6 +23,7 @@ export interface ChampionData {
 	currentLocation: Location;
 	stunnedTurn: number;
 	invulnTurn: number;
+	movedNum: number;
 }
 
 export interface DataGameError {
@@ -89,13 +90,15 @@ export interface DataGameMove {
 }
 
 export interface DataGameUpdate {
+	sourceUid: string;
 	nexus?: {[playerId: string]: number};
 	killed?: { uid: string, killer: string }[];
 	damaged?: { uid: string, health: number, attacker: string }[];
 	hand?: ChampionData[];
 	enemySpawn?: ChampionData[];
 	moved?: { uid: string, location: Location }[];
-	affected?: { uid: string, status: Status }[];
+	affected?: { uid: string, status: Status, turnNum: number }[];
+	movedNum?: number;
 
 	turnNum: number;
 	turnPlayer: string;

@@ -31,6 +31,13 @@ export class GamesManager {
 	}
 
 	/**
+	* @return whether the game exists or not
+	*/
+	public hasGame(gameId: string): boolean {
+		return gameId in this.games;
+	}
+
+	/**
 	* @return the game with the given game id
 	*/
 	public getGame(gameId: string): g.Game {
