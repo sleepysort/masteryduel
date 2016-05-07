@@ -28,6 +28,9 @@ export class GameService {
 	private enemyNexusHealth: Wrapper<number>;
 	private playerNexusHealth: Wrapper<number>;
 
+	/** Champion that is currently clicked to show controls */
+	private controlChampId: string;
+
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
 		this.activeChamps = [];
@@ -44,6 +47,7 @@ export class GameService {
 		this.initializeSockets();
 		this.enemyNexusHealth = { value: -1 };
 		this.playerNexusHealth = { value: -1 };
+		this.controlChampId = null;
 	}
 
 	private initializeSockets(): void {
@@ -160,6 +164,19 @@ export class GameService {
 
 	public getQueuedMove(): {uid: string, moveType: string} {
 		return this.queuedMove;
+	}
+
+	public setControlChamp(uid: string): void {
+		if (this.controlChampId) {
+			this.champStyles[this.controlChampId].isControl = false;
+		}
+		this.champStyles[uid].isControl = true;
+		this.controlChampId = uid;
+	}
+
+	public unsetControlChamp(uid: string): void {
+		this.champStyles[uid].isControl = false;
+		this.controlChampId = null;
 	}
 
 	public addChampion(champ: I.ChampionData): void {
