@@ -1,6 +1,6 @@
 import I = require('./interfaces');
 
-export class statcomputer {
+export class StatComputer {
 
   public static getHealth(primary: I.ChampionTag, secondary: I.ChampionTag, champLevel: number): number {
     return this.compStats(primary, secondary, champLevel, 'health');
