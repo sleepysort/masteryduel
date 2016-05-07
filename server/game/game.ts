@@ -722,6 +722,7 @@ export class Champion {
 	private currentLocation: Location;
 	private stunnedTurn: number;
 	private invulnTurn: number;
+	private hasMoved: boolean;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		this.uid = generator.generateId(8);
@@ -734,6 +735,11 @@ export class Champion {
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
+<<<<<<< HEAD
+=======
+		this.hasMoved = false;
+
+>>>>>>> 51ec60716517178a99c8276bc6eaf033370b5a55
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
 				game.getChamp(data.targetUid).stunnedTurn = game.getGameTurnNum() + 1;
@@ -749,7 +755,7 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion): boolean {
-		enemy.health -= Math.min(this.dmg, enemy.health);
+		enemy.takeDamage(this.dmg);
 		return enemy.health === 0;
 	}
 
