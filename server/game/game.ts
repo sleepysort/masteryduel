@@ -136,7 +136,7 @@ export class Game {
 									this.applyMove(move);
 								});
 							}
-						}).catch(() => {
+						}).catch((err) => {
 							player.getSocket().emit('gameerror', {reason: "Failed to load deck."});
 						});
 			});

@@ -41,10 +41,10 @@ export class StatComputer {
     }
 
     if (!secondary) {
-      return Math.round(this.getStatByTag[primary, index] * Math.pow(this.getStatByTag[primary, index+1], champLevel));
+      return Math.round(this.getStatByTag(primary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel));
     } else {
-      return Math.round((this.getStatByTag[primary, index] * Math.pow(this.getStatByTag[primary, index+1], champLevel) +
-                         this.getStatByTag[secondary, index] * Math.pow(this.getStatByTag[primary, index+1], champLevel)) / 2);
+      return Math.round((this.getStatByTag(primary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel) +
+                         this.getStatByTag(secondary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel)) / 2);
     }
   }
 }
