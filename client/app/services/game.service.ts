@@ -2,6 +2,7 @@ import {Injectable} from 'angular2/core';
 import {ChampionDto, Dictionary, GameState, Style, Wrapper} from '../interfaces/interfaces';
 import * as I from '../interfaces/data.interfaces';
 import {ChampionHelper} from '../helpers/champion.helper';
+import {MessageLogger} from '../helpers/messagelogger';
 
 @Injectable()
 export class GameService {
@@ -75,11 +76,22 @@ export class GameService {
 				console.log(msg);
 			});
 
+			this.sock.on('gamechat', (msg: I.DataGameChat) => {
+				if (msg.playerId === this.playerId) {
+					MessageLogger.playerChatMessage(msg.text);
+				} else {
+					MessageLogger.opponentChatMessage(msg.text);
+				}
+			});
+
 			this.sock.on('gameinit', (msg: I.DataGameInit) => {
 				console.log(msg);
 				for (let i = 0; i < msg.hand.length; i++) {
 					this.addChampion(msg.hand[i]);
 				}
+
+				MessageLogger.systemMessage('The game is starting!');
+
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.gameState.value = GameState.Started;

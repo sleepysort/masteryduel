@@ -105,6 +105,11 @@ export interface DataGameUpdate {
 	moveCount: number;
 }
 
+export interface DataGameChat {
+	playerId: string;
+	text: string;
+}
+
 /**
 * Representation of a champion ability
 */
