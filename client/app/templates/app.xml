@@ -5,18 +5,8 @@
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
 	<button (click)="sendMessage()">Send</button>
 </div>
-<div>
 	<img src="/public/img/NexusRed.png" class="nexus-opponent" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-top inhib" [class.active]="enemyInhibs[0].isActive" (click)="onAttackTopInhib($event)" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-mid inhib" [class.active]="enemyInhibs[1].isActive" (click)="onAttackMidInhib($event)" />
-	<img src="/public/img/InhibRed.png" class="inhib-opponent-bot inhib" [class.active]="enemyInhibs[2].isActive" (click)="onAttackBotInhib($event)" />
-</div>
-<div>
 	<img src="/public/img/NexusBlue.png" class="nexus-player" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-top" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-mid" />
-	<img src="/public/img/InhibBlue.png" class="inhib-player-bot" />
-</div>
 <div class="player-health">
 	Nexus Health: {{playerNexusHealth.value}}
 </div>

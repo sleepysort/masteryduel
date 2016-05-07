@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 
 const MESSAGE_LOGGER_SELECTOR = '.message-logger-content';
 

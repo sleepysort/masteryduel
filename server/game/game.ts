@@ -425,7 +425,7 @@ export class Game {
 		}
 
 		// If opponent health is zero, end the game
-		if (opp.applyDamage(data.source.getDamage())) {
+		if (opp.applyDamage(source.getDamage())) {
 			this.onGameOver(player);
 		}
 
@@ -702,7 +702,7 @@ export class Player {
 	* @return the player's health
 	*/
 	public getHealth(): number {
-		return
+		return this.health;
 	}
 
 	/**

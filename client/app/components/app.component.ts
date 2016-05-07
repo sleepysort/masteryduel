@@ -22,14 +22,12 @@ export class AppComponent implements OnInit {
 	public summonerName: string;
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
-	public enemyInhibs: Style[];
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
 	public ngOnInit(): void {
 		this.gameState = this.game.getGameState();
 		this.playerNexusHealth = this.game.getPlayerNexusHealth()
-		this.enemyInhibs = this.game.getEnemyInhibStyles();
 	}
 
 	public sendMessage(): void {
@@ -44,25 +42,4 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
-
-	public onAttackTopInhib(event: Event): void {
-		if (this.game.getQueuedMove() && this.enemyInhibs[0].isActive) {
-			this.game.registerNexusClick(I.Location.LaneTop);
-		}
-		event.stopPropagation();
-	}
-
-	public onAttackMidInhib(event: Event): void {
-		if (this.game.getQueuedMove() && this.enemyInhibs[1].isActive) {
-			this.game.registerNexusClick(I.Location.LaneTop);
-		}
-		event.stopPropagation();
-	}
-
-	public onAttackBotInhib(event: Event): void {
-		if (this.game.getQueuedMove() && this.enemyInhibs[2].isActive) {
-			this.game.registerNexusClick(I.Location.LaneTop);
-		}
-		event.stopPropagation();
-	}
 }

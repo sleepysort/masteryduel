@@ -22,25 +22,20 @@ body {
     z-index: -1;
 }
 
-.inhib-player-top {
-    position: fixed;
-    top: 70%;
-    left: 22.5%;
-    z-index: -1;
+.lane-structs {
+    position: absolute;
+    text-align: center;
+    width: 100%;
 }
 
-.inhib-player-mid {
-    position: fixed;
-    top: 70%;
-    left: 45%;
-    z-index: -1;
+.lane-ally-structs {
+    .lane-structs;
+    bottom: -128px;
 }
 
-.inhib-player-bot {
-    position: fixed;
-    top: 70%;
-    left: 70%;
-    z-index: -1;
+.lane-opponent-structs {
+    .lane-structs;
+    top: -128px;
 }
 
 .nexus-opponent {
@@ -51,27 +46,6 @@ body {
     z-index: -1;
 }
 
-.inhib-opponent-top {
-    position: fixed;
-    top: -10%;
-    left: 22.5%;
-    z-index: -1;
-}
-
-.inhib-opponent-mid {
-    position: fixed;
-    top: -10%;
-    left: 45%;
-    z-index: -1;
-}
-
-.inhib-opponent-bot {
-    position: fixed;
-    top: -10%;
-    left: 70%;
-    z-index: -1;
-}
-
 .player-health {
     position: fixed;
     top: 65%;
@@ -79,7 +53,7 @@ body {
     color: white
 }
 
-.inhib.active {
+.inhib-opponent.active {
     cursor: url('/public/img/CursorAttack.cur'), pointer;
 }
 
@@ -327,8 +301,10 @@ md-champion {
     display: flex;
 
     .lane() {
-        height: 100%;
+        height: 60%;
+        margin: 20% 0;
         flex: 1;
+        position: relative;
     }
 
     .lane-top {
@@ -359,16 +335,18 @@ md-champion {
     }
 
     .lane-ally {
+        position: absolute;
         width: 100%;
         height: 50%;
-        top: 0;
+        bottom: 0;
         display: flex;
     }
 
     .lane-enemy {
+        position: absolute;
         width: 100%;
         height: 50%;
-        bottom: 0;
+        top: 0;
         display: flex;
     }
 }
