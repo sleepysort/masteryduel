@@ -37,7 +37,7 @@ export class ChampionComponent implements OnInit {
 		if (this.champData.owner === this.game.getPlayerId()) {
 			if (this.styles.isControl) {
 				this.game.unsetControlChamp(this.champData.uid);
-			} else {
+			} else if (this.game.getCurrentTurnPlayer().value === this.game.getPlayerId()) {
 				this.game.setControlChamp(this.champData.uid);
 			}
 		}

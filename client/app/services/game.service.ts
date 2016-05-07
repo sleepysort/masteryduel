@@ -15,7 +15,6 @@ export class GameService {
 	private champDict: Dictionary<I.ChampionData>;
 	private champStyles: Dictionary<Style>;
 	private enemyInhibStyles: Style[];
-	private currentPlayerId: string;
 	private laneStyles: Style[];
 
 	/** Lanes */
@@ -54,6 +53,8 @@ export class GameService {
 		this.initializeSockets();
 		this.enemyNexusHealth = { value: 5 };
 		this.playerNexusHealth = { value: 5 };
+		this.currentTurnPlayer = { value: null };
+		this.currentTurnMovesLeft = { value: 0 };
 		this.controlChampId = null;
 	}
 
@@ -97,6 +98,7 @@ export class GameService {
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.gameState.value = GameState.Started;
+				this.currentTurnPlayer.value = msg.starter;
 				this.turnNum.value = 1;
 			});
 
@@ -311,6 +313,7 @@ export class GameService {
 			this.applyUpdateNexus(update);
 		}
 
+		this.currentTurnPlayer.value = update.turnPlayer;
 		this.champDict[update.sourceUid].movedNum = update.movedNum;
 		this.turnNum.value = update.turnNum;
 	}
