@@ -728,9 +728,9 @@ export class Champion {
 		this.champId = champId;
 		this.champLevel = champLevel;
 		this.owner = owner;
-		this.maxHealth = SC.getHealth(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
+		this.maxHealth = SC.statcomputer.getHealth(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
 		this.health = this.maxHealth;
-		this.dmg = SC.getDamage(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
+		this.dmg = SC.statcomputer.getDamage(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
