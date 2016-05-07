@@ -6,6 +6,7 @@ import I = require('./interfaces');
 import Logger = require('../util/logger');
 import CT = require('./championtags');
 import SC = require('./statcomputer');
+import sanitizer = require('sanitizer');
 
 /**
 * Represents the various stages of the game
@@ -96,6 +97,11 @@ export class Game {
         };
 
         sock.emit('gamejoin-ack', ackMsg);
+
+		sock.on('gamechat', (msg) => {
+			msg.text = sanitizer.sanitize(msg.text);
+			this.emitAll('gamechat', msg);
+		});
 
 		if (this.players.length === constants.MAX_PLAYERS) {
 			this.gameState = GameState.NotStarted;

@@ -29,6 +29,8 @@ export class ChampionPositionerComponent implements OnInit {
 
 	public hand: ChampionData[];
 
+	public isDrawerOpen: boolean;
+
 	constructor(private game: GameService, private lolapi: LolApiService) {
 	}
 
@@ -43,6 +45,8 @@ export class ChampionPositionerComponent implements OnInit {
 		this.topLaneStyles = this.game.getLaneStyles(0);
 		this.midLaneStyles = this.game.getLaneStyles(1);
 		this.botLaneStyles = this.game.getLaneStyles(2);
+
+		this.isDrawerOpen = true;
 	}
 
 	public onTopLaneClicked() {
@@ -52,14 +56,19 @@ export class ChampionPositionerComponent implements OnInit {
 	}
 
 	public onMidLaneClicked() {
-		if (this.topLaneStyles.isActive) {
+		if (this.midLaneStyles.isActive) {
 			this.game.registerLaneClick("LaneMid");
 		}
 	}
 
 	public onBotLaneClicked() {
-		if (this.topLaneStyles.isActive) {
+		if (this.botLaneStyles.isActive) {
 			this.game.registerLaneClick("LaneBot");
 		}
+	}
+
+	public onDrawerButtonClicked(event: Event) {
+		this.isDrawerOpen = !this.isDrawerOpen;
+		event.stopPropagation();
 	}
 }
