@@ -750,11 +750,7 @@ export class Champion {
 	private currentLocation: Location;
 	private stunnedTurn: number;
 	private invulnTurn: number;
-<<<<<<< HEAD
-=======
-
 	public movedNum: number;
->>>>>>> 67d76cb131aa1ae8012d6560815cb3783a1c1f8e
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		this.uid = generator.generateId(8);
@@ -767,10 +763,6 @@ export class Champion {
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
-<<<<<<< HEAD
-=======
-
->>>>>>> 67d76cb131aa1ae8012d6560815cb3783a1c1f8e
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
 				game.getChamp(data.targetUid).stunnedTurn = game.getGameTurnNum() + 1;
