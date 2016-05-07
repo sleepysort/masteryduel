@@ -136,7 +136,7 @@ export class Game {
 									this.applyMove(move);
 								});
 							}
-						}).catch(() => {
+						}).catch((err) => {
 							player.getSocket().emit('gameerror', {reason: "Failed to load deck."});
 						});
 			});
@@ -759,21 +759,19 @@ export class Champion {
 	private currentLocation: Location;
 	private stunnedTurn: number;
 	private invulnTurn: number;
-
 	public movedNum: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		this.uid = generator.generateId(8);
 		this.champId = champId;
-		this.champLevel = champLevel; this.owner = owner;
+		this.champLevel = champLevel;
 		this.owner = owner;
-		this.health = 5;
-		this.maxHealth = 5;
-		this.dmg = 3;
+		this.maxHealth = SC.StatComputer.getHealth(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
+		this.health = this.maxHealth;
+		this.dmg = SC.StatComputer.getDamage(CT.ChampionTags.getTag(champId).primary, CT.ChampionTags.getTag(champId).secondary, champLevel);
 		this.currentLocation = Location.Hand;
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
-
 		this.ability = {
 			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
 				let enemy = game.getChamp(data.targetUid);
@@ -790,7 +788,7 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion): boolean {
-		enemy.takeDamage(this.dmg);
+		enemy.health -= Math.min(this.dmg, enemy.health);
 		return enemy.health === 0;
 	}
 

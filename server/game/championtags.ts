@@ -18,12 +18,12 @@ export class ChampionTags {
 				throw new Error("Failed to load champion tags");
 			} else {
 				for (let key in body.data) {
-					let champ = body.data[key];
-					let tags = {
+					let champ: {id: number, tags: string} = body.data[key];
+					let tags: {primary: I.ChampionTag, secondary: I.ChampionTag} = {
 						primary: I.ChampionTag[champ.tags[0]],
 						secondary: I.ChampionTag[champ.tags[1]]
 					};
-					ChampionTags[champ.id] = tags;
+					ChampionTags.tags[champ.id] = tags;
 				}
 			}
 			ChampionTags.loaded = true;
