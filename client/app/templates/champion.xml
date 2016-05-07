@@ -1,12 +1,26 @@
 <div *ngIf="champData" class="champion" [class.selected]="!hideControls && !styles.isSource" [class.source]="styles.isSource" [class.active]="styles.isActive" (click)="onChampionClick($event)">
+    <div class="champ-name">{{champName}}</div>
     <div class="champ-card">
         <img class="champ-image" src="{{champImgUrl}}"/>
         <img class="champ-border" src="/public/img/card-border.png" />
     </div>
     <div class="champ-stats">
-        <div>{{champName}}</div>
-        <div>Health: {{champData.health}}</div>
-        <div>Damage: {{champData.dmg}}</div>
+        <div class="health-stat">
+            HP: {{champData.health}} / {{champData.maxHealth}}
+            <div class="health-bar">
+                <div class="health-current" [style.width]="(champData.health/champData.maxHealth)*100 + '%'"></div>
+            </div>
+        </div>
+        <div class="stat">
+            Damage: {{champData.dmg}}
+        </div>
+        <div class="stat stat-ability">
+            {{champData.ability.name}}
+            <div class="ability-tooltip">
+                {{champData.ability.description}}
+                <div class="ability-tooltip-arrow"></div>
+            </div>
+        </div>
     </div>
     <div class="champ-mask" [hidden]="hideControls && !styles.isSource">
         <div class="champ-controls">
