@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Lora', serif;
-    cursor: default;
+    cursor: url('/public/img/CursorDefault.cur'), pointer;
 }
 
 .background {
@@ -112,6 +112,7 @@ md-champion {
                     .health-current {
                         height: 100%;
                         background-color: red;
+                        transition: width 1s ease;
                     }
                 }
             }
@@ -128,6 +129,7 @@ md-champion {
                     width: 150px;
                     padding: 8px;
                     font-style: normal;
+                    box-shadow: 0px 0px 20px 2px #222;
 
                     .ability-tooltip-arrow {
                         position: absolute;
@@ -138,7 +140,6 @@ md-champion {
                         border-left: 10px solid #eee;
                         left: 165px;
                         bottom: 10px;
-                        box-shadow: 0px 0px 20px 2px #222;
                     }
                 }
 
@@ -173,7 +174,7 @@ md-champion {
 }
 
 .champion.active {
-    cursor: pointer;
+    cursor: url('/public/img/CursorAttack.cur'), pointer;
 }
 
 .champion.source {
@@ -231,7 +232,7 @@ md-champion {
         background-color: rgba(200,0,0,0.5);
 
         &.active {
-            cursor: pointer;
+            cursor: url('/public/img/CursorMove.cur'), pointer;
         }
     }
 
@@ -240,7 +241,7 @@ md-champion {
         background-color: rgba(0,0,200,0.5);
 
         &.active {
-            cursor: pointer;
+            cursor: url('/public/img/CursorMove.cur'), pointer;
         }
     }
 
@@ -249,7 +250,7 @@ md-champion {
         background-color: rgba(0,200,0,0.5);
 
         &.active {
-            cursor: pointer;
+            cursor: url('/public/img/CursorMove.cur'), pointer;
         }
     }
 
