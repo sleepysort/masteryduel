@@ -30,12 +30,12 @@ body {
 
 .lane-ally-structs {
     .lane-structs;
-    bottom: -128px;
+    bottom: -64px;
 }
 
 .lane-opponent-structs {
     .lane-structs;
-    top: -128px;
+    top: -64px;
 }
 
 .nexus-opponent {
@@ -43,27 +43,6 @@ body {
     transform: translateY(-50%) scale(0.25);
     top: 11%;
     left: -17%;
-    z-index: -1;
-}
-
-.inhib-opponent-top {
-    position: fixed;
-    top: -2%;
-    left: 25%;
-    z-index: -1;
-}
-
-.inhib-opponent-mid {
-    position: fixed;
-    top: -2%;
-    left: 45%;
-    z-index: -1;
-}
-
-.inhib-opponent-bot {
-    position: fixed;
-    top:-2%;
-    left: 65%;
     z-index: -1;
 }
 
@@ -314,15 +293,16 @@ md-champion {
     z-index: -1;
     height: 100%;
     width: 100%;
+    top: -20%;
     position: absolute;
-    top: 0;
     left: 0;
     padding: 0 20%;
     box-sizing: border-box;
     display: flex;
 
     .lane() {
-        height: 60%;
+
+        height: 72.5%;
         margin: 20% 0;
         flex: 1;
         position: relative;
