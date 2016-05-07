@@ -1,7 +1,4 @@
 <div class="champion-positioner">
-	<div class="hand-container">
-		<md-champion *ngFor="let champ of hand" [champData]="champ"></md-champion>
-	</div>
 	<div class="lane-container">
 		<div class="lane-top" [class.active]="topLaneStyles.isActive" (click)="onTopLaneClicked()">
 			<div class="lane-enemy">
@@ -26,6 +23,14 @@
 			<div class="lane-ally">
 				<md-champion *ngFor="let champ of botLaneAllies" [champData]="champ"></md-champion>
 			</div>
+		</div>
+	</div>
+	<div class="drawer" [class.drawer-opened]="isDrawerOpen">
+		<div class="drawer-toggle-btn" (click)="onDrawerButtonClicked($event)">
+			<img src="/public/img/caret.png" />
+		</div>
+		<div class="hand-container">
+			<md-champion *ngFor="let champ of hand" [champData]="champ"></md-champion>
 		</div>
 	</div>
 </div>

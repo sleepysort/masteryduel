@@ -7,7 +7,6 @@ import {ChampionHelper} from '../helpers/champion.helper';
 export class GameService {
 	private sock: SocketIOClient.Socket;
 	private playerId: string;
-	private playerHealth: number;
 	private gameId: string;
 	private gameState: Wrapper<GameState>;
 	private turnNum: Wrapper<number>;
