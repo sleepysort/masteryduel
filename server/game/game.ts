@@ -598,7 +598,6 @@ export class Game {
 		// Keep track of health in case of lifesteal
 		let originalHealth = source.getHealth();
 
-
 		// If enemy is killed, send to fountain
 		if (source.attackEnemy(target, this.getTurnNum())) {
 			this.getPlayer(target.getOwner()).sendToFountain(target);
@@ -620,7 +619,6 @@ export class Game {
 			});
 		}
 
-		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
 
@@ -653,7 +651,6 @@ export class Game {
 		}
 
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
-		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
 	}
 
@@ -924,9 +921,13 @@ export class Champion {
 		this.statusEndTurn = [];
 		this.ability = {
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
 				let enemy = game.getChamp(data.targetUid);
 				enemy.setStunnedTurn(game.getGameTurnNum() + 1);
 				update.affected.push({uid: data.targetUid, status: I.Status.Stunned, turnNum: enemy.stunnedTurn});
+
+				champ.movedNum = game.getTurnNum();
+
 				return 5;
 			},
 			name: "Stun",
@@ -938,6 +939,7 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
+		this.movedNum = turnNum;
 		return enemy.takeDamage(this.dmg, this, turnNum);
 	}
 
@@ -1150,7 +1152,7 @@ function createChampionById(owner: string, champId: number, champLevel: number):
 *		a) name, description, type, readyTurn are all required
 			- readyTurn is NOT the cooldown. Set it to 0.
 *		b) If the ability is passive, set effect to null, and instead override the
-*		   takeDamage or attackChamp methods
+*		   takeDamage or attackEnemy methods
 *		c) If the ability is an active, define it in effect. You should return the cooldown here.
 *			- MAKE SURE TO UPDATE THE update OBJECT!!!!!!
 *			- YOU MUST ALSO INITIALIZE THE CORRESPONDING ARRAY
@@ -1251,7 +1253,7 @@ class Akali extends Champion {
 		};
 	}
 
-	public attackChamp(enemy: Champion, turnNum: number): boolean {
+	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let killed = enemy.takeDamage(this.dmg, this, turnNum);
 		if (killed) {
 			this.movedNum = turnNum - 1;
@@ -1875,7 +1877,7 @@ class Lucian extends Champion {
 		this.isBonusDamage = true;
 	}
 
-	public attackChamp(enemy: Champion, turnNum: number): boolean {
+	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
 		if (this.isBonusDamage) {
 			dmg = Math.round(dmg * 1.15);
