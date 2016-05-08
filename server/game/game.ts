@@ -99,7 +99,7 @@ export class Game {
         sock.emit('gamejoin-ack', ackMsg);
 
 		sock.on('gamechat', (msg) => {
-			msg.text = sanitizer.sanitize(msg.text);
+			msg.text = sanitizer.escape(sanitizer.sanitize(msg.text));
 			this.emitAll('gamechat', msg);
 		});
 

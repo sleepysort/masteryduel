@@ -63,7 +63,7 @@ export class GameService {
 
 		this.sock.once('gamejoin-ack', (res: I.DataGameJoinAck) => {
 			if (!res.success) {
-				console.log('Could not connect to game: ' + res.reason);
+				MessageLogger.systemMessage('Failed to join the game. ' + res.reason);
 				this.sock.close();
 				return;
 			}
@@ -71,12 +71,15 @@ export class GameService {
 			this.playerId = res.playerId;
 
 			this.sock.on('gameprep', (msg: I.DataGamePrep) => {
-				console.log(msg);
 				this.gameState.value = GameState.NotStarted;
 			});
 
 			this.sock.on('gameselect-ack', (msg: I.DataGameSelectAck) => {
-				console.log(msg);
+				if (msg.success) {
+					MessageLogger.systemMessage('Deck successfully loaded.');
+				} else {
+					MessageLogger.systemMessage('Failed to load the deck.');
+				}
 			});
 
 			this.sock.on('gamechat', (msg: I.DataGameChat) => {
@@ -93,7 +96,7 @@ export class GameService {
 					this.addChampion(msg.hand[i]);
 				}
 
-				MessageLogger.systemMessage('The game is starting!');
+				MessageLogger.systemMessage('The game is starting! GLHF');
 
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.playerNexusHealth.value = msg.nexusHealth;
@@ -103,12 +106,11 @@ export class GameService {
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
-				console.log(msg);
 				this.applyUpdate(msg);
 			});
 
 			this.sock.on('gameerror', (msg: I.DataGameError) => {
-				console.log(msg);
+				MessageLogger.systemMessage('Server sent an error: ' + msg.message);
 			});
 		});
 
@@ -446,17 +448,17 @@ export class GameService {
 
 	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {
-			console.log("Someone is already moving");
+			MessageLogger.systemMessage('Another champion is already trying to make a move.');
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
-			console.log("This champion is stunned.");
+			MessageLogger.systemMessage('This champion is stunned.');
 			return false;
 		}
 
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
-			console.log("This champion has already made a move this turn.");
+			MessageLogger.systemMessage("This champion has already made a move this turn.");
 			return false;
 		}
 
@@ -468,17 +470,17 @@ export class GameService {
 
 	public registerChampionMove(uid: string): boolean {
 		if (this.queuedMove) {
-			console.log("Someone is already moving");
+			MessageLogger.systemMessage('Another champion is already trying to make a move.');
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
-			console.log("This champion is stunned.");
+			MessageLogger.systemMessage("This champion is stunned.");
 			return false;
 		}
 
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
-			console.log("This champion has already made a move this turn.");
+			MessageLogger.systemMessage("This champion has already made a move this turn.");
 			return false;
 		}
 
@@ -490,12 +492,12 @@ export class GameService {
 
 	public registerChampionAbility(uid: string): boolean {
 		if (this.queuedMove) {
-			console.log("Someone is already moving");
+			MessageLogger.systemMessage('Another champion is already trying to make a move.');
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
-			console.log("This champion is stunned.");
+			MessageLogger.systemMessage("This champion is stunned.");
 			return false;
 		}
 
@@ -520,7 +522,7 @@ export class GameService {
 
 	public registerChampionClick(uid: string): void {
 		if (!this.queuedMove) {
-			console.log("No one is attacking");
+			MessageLogger.systemMessage("No one is currently attacking.");
 			return;
 		}
 
@@ -553,7 +555,7 @@ export class GameService {
 
 	public registerNexusClick(location: I.Location): void {
 		if (!this.queuedMove) {
-			console.log("No one is attacking");
+			MessageLogger.systemMessage("No one is currently attacking.");
 			return;
 		}
 

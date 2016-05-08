@@ -4,6 +4,7 @@ import * as I from '../interfaces/data.interfaces';
 import {LolApiService} from '../services/lolapi.service';
 import {GameService} from '../services/game.service';
 import {ChampionPositionerComponent} from './championpositioner.component';
+import $ from 'jquery';
 
 /**
  * The root component of the application.
@@ -44,4 +45,13 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
+	public onChat(event: KeyboardEvent): void {
+		if (event.keyCode === 13) {  // Enter
+			this.game.send('gamechat', {
+				playerId: this.game.getPlayerId(),
+				text: $('.message-logger-input').val()
+			});
+			$('.message-logger-input').val('');
+		}
+	}
 }

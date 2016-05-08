@@ -36,3 +36,9 @@
 	<button (click)="sendGameSelect()">Load Deck</button>
 </div>
 <md-championpositioner></md-championpositioner>
+
+<div class="message-logger">
+	<div class="message-logger-content">
+	</div>
+	<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onChat($event)"/>
+</div>

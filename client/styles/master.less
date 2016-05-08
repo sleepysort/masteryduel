@@ -390,3 +390,41 @@ md-champion {
     background-color: red;
     transition: width 1s ease;
 }
+
+.message-logger {
+    width: 15%;
+    position: absolute;
+    height: 30%;
+    box-sizing: border-box;
+    left: 30px;
+    bottom: 300px;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+
+    .message-logger-content {
+        flex: 1;
+        padding: 10px;
+        color: white;
+        overflow-y: auto;
+        color: white;
+
+        p {
+            margin: 0;
+        }
+
+        .system-message {
+            font-weight: bold;
+        }
+    }
+
+    .message-logger-input {
+        height: 1.5em;
+        background-color: rgba(255, 255, 255, 0.3);
+        border: none;
+        padding: 3px;
+        padding-left: 5px;
+        outline: none !important;
+        color: white;
+    }
+}
