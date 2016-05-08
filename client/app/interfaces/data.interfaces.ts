@@ -138,11 +138,13 @@ export enum Status {
 export enum AbilityType {
 	None,
 	Passive,
+	Self,
 	SingleEnemySameLane,
 	SingleEnemyAnyLane,
 	SingleAllySameLane,
 	SingleAllyAnyLane,
 	AOEEnemySameLane,
+	AOEEnemyAnyLane,
 	AOEAlly,
 	GlobalAlly,
 	GlobalEnemy

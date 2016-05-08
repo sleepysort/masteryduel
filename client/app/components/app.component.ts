@@ -47,10 +47,18 @@ export class AppComponent implements OnInit {
 
 	public onMessageLogger(event: KeyboardEvent): void {
 		if (event.keyCode === 13) {  // Enter
-			this.game.send('gamechat', {
-				playerId: this.game.getPlayerId(),
-				text: $('.message-logger-input').val()
-			});
+			let msg: string = $('.message-logger-input').val();
+			if (msg.indexOf('@debug') === 0) {
+				this.game.send('gamedebug', {
+					playerId: this.game.getPlayerId(),
+					spawn: msg.substr(7).split(' ').map(val => parseInt(val))
+				});
+			} else {
+				this.game.send('gamechat', {
+					playerId: this.game.getPlayerId(),
+					text: msg
+				});
+			}
 			$('.message-logger-input').val('');
 		}
 	}
