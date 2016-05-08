@@ -40,5 +40,5 @@
 <div class="message-logger">
 	<div class="message-logger-content">
 	</div>
-	<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onChat($event)"/>
+	<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onMessageLogger($event)"/>
 </div>

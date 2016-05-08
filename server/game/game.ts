@@ -8,6 +8,14 @@ import CT = require('./championtags');
 import SC = require('./statcomputer');
 import sanitizer = require('sanitizer');
 
+/**************************************************************************************************
+* DO NOT DEPLOY WITH DEBUG ENABLED
+**************************************************************************************************/
+const DEBUG_ENABLED = true;
+/**************************************************************************************************
+* DO NOT DEPLOY WITH DEBUG ENABLED
+**************************************************************************************************/
+
 /**
 * Represents the various stages of the game
 */
@@ -74,15 +82,15 @@ export class Game {
 			throw new Error('The game is full.');
 		}
 
-		let playerId = generator.generateId(6);
-		let player = new Player(playerId, sock);
-		this.players.push(player);
+		let newPlayerId = generator.generateId(6);
+		let newPlayer = new Player(newPlayerId, sock);
+		this.players.push(newPlayer);
 
-		Logger.log(Logger.Tag.Game, 'Player ' + playerId + ' successfully joined game.', this.gameId);
+		Logger.log(Logger.Tag.Game, 'Player ' + newPlayerId + ' successfully joined game.', this.gameId);
 
 		sock.on('disconnect', () => {
-			Logger.log(Logger.Tag.Network, 'Player ' + playerId + ' disconnected from game ' + this.gameId + '.');
-			this.players.splice(this.players.indexOf(player), 1);
+			Logger.log(Logger.Tag.Network, 'Player ' + newPlayerId + ' disconnected from game ' + this.gameId + '.');
+			this.players.splice(this.players.indexOf(newPlayer), 1);
 			this.gameState = GameState.Over;
 			this.emitAll('gameover', { reason: 'Player disconnected' });
 			if (this.isGameEmpty()) {
@@ -93,7 +101,7 @@ export class Game {
 
 		let ackMsg: I.DataGameJoinAck = {
             success: true,
-            playerId: playerId
+            playerId: newPlayerId
         };
 
         sock.emit('gamejoin-ack', ackMsg);
@@ -107,9 +115,6 @@ export class Game {
 			this.gameState = GameState.NotStarted;
 
 			Logger.log(Logger.Tag.Game, 'Waiting for players to get ready.', this.gameId);
-
-			let prepMsg: I.DataGamePrep = { message: "Select a summoner deck." };
-			this.emitAll('gameprep', prepMsg);
 
 			// TODO: Right now, we are relying on the correctness of the client's message for the player id, when we should really just be using it for validation
 			this.onAll('gameselect', (msg: I.DataGameSelect) => {
@@ -141,14 +146,49 @@ export class Game {
 								this.onAll('gamemove', (move: I.DataGameMove) => {
 									this.applyMove(move);
 								});
+
 							}
 						}).catch((err) => {
-							player.getSocket().emit('gameerror', {reason: "An error occurred during initialization."});
+							player.getSocket().emit('gameerror', {reason: "Failed to load deck."});
 						});
 			});
+
+			let prepMsg: I.DataGamePrep = { message: "Select a summoner deck." };
+			this.emitAll('gameprep', prepMsg);
+
+			// If debugging is enabled, listen for debug events
+			if (DEBUG_ENABLED) {
+				this.onAll('gamedebug', (msg) => {
+					let player = this.getPlayer(msg.playerId);
+					let hand = this.getHand(player.getId());
+
+					let update: I.DataGameUpdate = {
+						sourceUid: null,
+						killed: [],
+						hand: [],
+						turnNum: this.turnNum,
+						turnPlayer: this.getCurrentTurnPlayerId(),
+						moveCount: this.movesCount
+					};
+
+					for (let i = 0; i < Math.min(5, msg.spawn.length); i++) {
+						update.killed.push({
+							uid: hand[i].getUid(),
+							killer: hand[i].getUid(),
+						});
+						delete this.activeChamps[hand[i].getUid()];
+						let champ = createChampionById(player.getId(), msg.spawn[i], 5);
+						this.activeChamps[champ.getUid()] = champ;
+						update.hand.push(champ);
+					}
+
+					player.getSocket().emit('gameupdate', update);
+				});
+			}
 		}
 
-		return playerId;
+
+		return newPlayerId;
 	}
 
 	/**
@@ -393,7 +433,14 @@ export class Game {
 			sourceUid: null,
 			moveCount: -1,
 			turnNum: -1,
-			turnPlayer: null
+			turnPlayer: null,
+			nexus: {},
+			killed: [],
+			damaged: [],
+			hand: [],
+			enemySpawn: [],
+			moved: [],
+			affected: []
 		};
 
 		if (player.getId() !== this.getCurrentTurnPlayerId()) {
@@ -505,7 +552,6 @@ export class Game {
 		update.movedNum = source.movedNum;
 
 		// Add data to update object
-		update.nexus = {};
 		update.nexus[opp.getId()] = opp.getHealth();
 	}
 
@@ -549,6 +595,10 @@ export class Game {
 		update.killed = [];
 		update.damaged = [];
 
+		// Keep track of health in case of lifesteal
+		let originalHealth = source.getHealth();
+
+
 		// If enemy is killed, send to fountain
 		if (source.attackEnemy(target, this.getTurnNum())) {
 			this.getPlayer(target.getOwner()).sendToFountain(target);
@@ -561,6 +611,15 @@ export class Game {
 				attacker: source.getUid()
 			});
 		}
+
+		if (originalHealth !== source.getHealth()) {
+			update.damaged.push({
+				uid: source.getUid(),
+				health: source.getHealth(),
+				attacker: source.getUid()
+			});
+		}
+
 		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
@@ -593,7 +652,6 @@ export class Game {
 			throw new Error('Champion has already made a move this turn');
 		}
 
-		update.affected = [];
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
 		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
@@ -648,12 +706,15 @@ export class Game {
 			throw new Error('This champion is stunned.');
 		}
 
+<<<<<<< HEAD
 		if (champ.getStasisTurn() >= this.turnNum) {
 			throw new Error('This champion is in stasis');
 		}
 
 		update.moved = [];
 
+=======
+>>>>>>> 39dc3bd9e70142a1bb12dc1a98e037c5bd64b530
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.movedNum = this.turnNum;
@@ -679,9 +740,6 @@ export class Game {
 		if (champ.getOwner() !== player.getId()) {
 			throw new Error('Cannot move opponent champion');
 		}
-
-		opUpdate.enemySpawn = [];
-		update.hand = [];
 
 		opUpdate.enemySpawn.push(champ);
 		delete opUpdate.moved;
@@ -1637,13 +1695,14 @@ class Thresh extends Champion {
 				let ally = game.getChamp(data.targetUid);
 				ally.setLocation(thresh.getLocation());
 
+				update.moved = update.moved || [];
+
 				update.moved.push({
 					uid: ally.getUid(),
 					location: ally.getLocation()
 				});
 
-				thresh.movedNum = game.getTurnNum();
-				update.movedNum = thresh.movedNum;
+				update.movedNum = game.getTurnNum();
 
 				return 7;
 			}
@@ -1651,6 +1710,7 @@ class Thresh extends Champion {
 	}
 }
 championById[412] = Thresh;
+
 
 class Lucian extends Champion {
 	private isBonusDamage: boolean;
@@ -1669,7 +1729,6 @@ class Lucian extends Champion {
 
 	public attackChamp(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
-
 		if (this.isBonusDamage) {
 			dmg = Math.round(dmg * 1.15);
 		}

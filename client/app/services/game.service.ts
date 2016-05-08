@@ -106,6 +106,7 @@ export class GameService {
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
+				console.log(msg);
 				this.applyUpdate(msg);
 			});
 
@@ -260,27 +261,27 @@ export class GameService {
 
 		switch (champ.currentLocation) {
 			case I.Location.Hand:
-				this.activeChamps.splice(this.activeChamps.indexOf(champ), 1);
+				this.hand.splice(this.hand.indexOf(champ), 1);
 				break;
 			case I.Location.LaneTop:
 				if (champ.owner === this.playerId) {
-					this.topLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+					this.topLaneAllies.splice(this.topLaneAllies.indexOf(champ), 1);
 				} else {
-					this.topLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+					this.topLaneEnemies.splice(this.topLaneEnemies.indexOf(champ), 1);
 				}
 				break;
 			case I.Location.LaneMid:
 				if (champ.owner === this.playerId) {
-					this.midLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+					this.midLaneAllies.splice(this.midLaneAllies.indexOf(champ), 1);
 				} else {
-					this.midLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+					this.midLaneEnemies.splice(this.midLaneEnemies.indexOf(champ), 1);
 				}
 				break;
 			case I.Location.LaneBot:
 				if (champ.owner === this.playerId) {
-					this.botLaneAllies.splice(this.activeChamps.indexOf(champ), 1);
+					this.botLaneAllies.splice(this.botLaneAllies.indexOf(champ), 1);
 				} else {
-					this.botLaneEnemies.splice(this.activeChamps.indexOf(champ), 1);
+					this.botLaneEnemies.splice(this.botLaneEnemies.indexOf(champ), 1);
 				}
 				break;
 		}
@@ -289,10 +290,6 @@ export class GameService {
 	public applyUpdate(update: I.DataGameUpdate): void {
 		if (update.moved && update.moved.length !== 0) {
 			this.applyUpdateMove(update);
-		}
-
-		if (update.hand && update.hand.length !== 0) {
-			this.applyUpdateHand(update);
 		}
 
 		if (update.enemySpawn && update.enemySpawn.length !== 0) {
@@ -311,10 +308,21 @@ export class GameService {
 			this.applyUpdateAffected(update);
 		}
 
-		this.applyUpdateNexus(update);
+		if (update.hand && update.hand.length !== 0) {
+			this.applyUpdateHand(update);
+		}
+
+		if (update.nexus) {
+			this.applyUpdateNexus(update);
+		}
 
 		this.currentTurnPlayer.value = update.turnPlayer;
-		this.champDict[update.sourceUid].movedNum = update.movedNum;
+
+		// Ignore for debug
+		if (update.sourceUid) {
+			this.champDict[update.sourceUid].movedNum = update.movedNum;
+		}
+
 		this.turnNum.value = update.turnNum;
 	}
 
