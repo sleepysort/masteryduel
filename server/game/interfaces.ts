@@ -104,5 +104,6 @@ export enum Status {
 	Stunned,
 	Invulnerable,
 	Stasis,
-	DamageReduction
+	DamageReduction,
+	Shielded
 }

@@ -136,7 +136,8 @@ export enum Status {
 	Stunned,
 	Invulnerable,
 	Stasis,
-	DamageReduction
+	DamageReduction,
+	Shielded
 }
 
 export enum AbilityType {
