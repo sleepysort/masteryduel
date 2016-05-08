@@ -5,14 +5,29 @@
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
 	<button (click)="sendMessage()">Send</button>
 </div>
-<div>
-	<img src="/public/img/NexusRed.png" class="nexus-opponent" />
+<div class="nexus-opponent">
+	<div *ngIf="enemyNexusHealth.value >= 0" class="nexus-health-bar">
+		<div class="current-health" [style.width]="((enemyNexusHealth.value * 100) / 5) + '%'"></div>
+		<!-- # of segments should be equal to max health-->
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+	</div>
+	<img src="/public/img/NexusRed.png" class="nexus" />
 </div>
-<div>
-	<img src="/public/img/NexusBlue.png" class="nexus-player" />
-</div>
-<div class="player-health">
-	Nexus Health: {{playerNexusHealth.value}}
+<div class="nexus-player">
+	<div *ngIf="playerNexusHealth.value >= 0" class="nexus-health-bar">
+		<div class="current-health" [style.width]="((playerNexusHealth.value * 100) / 5) + '%'"></div>
+		<!-- # of segments should be equal to max health-->
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+		<div class="health-segment"></div>
+	</div>
+	<img src="/public/img/NexusBlue.png" class="nexus" />
 </div>
 
 <!-- Pick summoner -->

@@ -22,12 +22,14 @@ export class AppComponent implements OnInit {
 	public summonerName: string;
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
+	public enemyNexusHealth: Wrapper<number>;
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
 	public ngOnInit(): void {
 		this.gameState = this.game.getGameState();
 		this.playerNexusHealth = this.game.getPlayerNexusHealth()
+		this.enemyNexusHealth = this.game.getEnemyNexusHealth()
 	}
 
 	public sendMessage(): void {

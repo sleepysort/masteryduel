@@ -639,7 +639,7 @@ export class Player {
 	constructor(playerId: string, sock: SocketIO.Socket) {
 		this.id = playerId;
 		this.sock = sock;
-		this.health = 10;
+		this.health = constants.NEXUS_STARTING_HEALTH;
 		this.deck = null;
 		this.ready = false;
 		this.invulnTurn = 3;  // Players cannot take damage until turn 3

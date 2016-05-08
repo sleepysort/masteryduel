@@ -14,18 +14,11 @@ body {
     z-index: -1;
 }
 
-.nexus-player {
-    position: fixed;
-    transform: translateY(-50%) scale(0.25);
-    top: 80%;
-    left: 71%;
-    z-index: -1;
-}
-
 .lane-structs {
     position: absolute;
     text-align: center;
     width: 100%;
+    z-index: 1;
 }
 
 .lane-ally-structs {
@@ -38,12 +31,29 @@ body {
     top: -64px;
 }
 
-.nexus-opponent {
-    position: fixed;
-    transform: translateY(-50%) scale(0.25);
-    top: 11%;
-    left: -17%;
+.nexus {
+    height: 150px;
+}
+
+.nexus-wrapper {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 20px;
+    width: 20%;
     z-index: -1;
+    text-align: center;
+}
+
+.nexus-opponent {
+    .nexus-wrapper;
+    top: 8.5%;
+    left: 0;
+}
+
+.nexus-player {
+    .nexus-wrapper;
+    bottom: 17%;
+    right: 0;
 }
 
 .player-health {
@@ -209,11 +219,11 @@ md-champion {
         }
     }
 
-    &:hover .champion { z-index: 4; }
-    &:hover+& .champion:not(.selected) { z-index: 3; }
-    &:hover+&+& .champion:not(.selected) { z-index: 2; }
-    &:hover+&+&+& .champion:not(.selected) { z-index: 1; }
-    &:hover+&+&+&+& .champion:not(.selected) { z-index: 0; }
+    &:hover .champion { z-index: 6; }
+    &:hover+& .champion:not(.selected) { z-index: 5; }
+    &:hover+&+& .champion:not(.selected) { z-index: 4; }
+    &:hover+&+&+& .champion:not(.selected) { z-index: 3; }
+    &:hover+&+&+&+& .champion:not(.selected) { z-index: 2; }
 }
 
 .champion.active {
@@ -221,12 +231,12 @@ md-champion {
 }
 
 .champion.source {
-    z-index: 5;
+    z-index: 7;
     transform: scale(1.0) translateX(-50%);
 }
 
 .champion.selected {
-    z-index: 5;
+    z-index: 7;
     transform: scale(1.0) translateX(-50%);
 }
 
@@ -293,7 +303,6 @@ md-champion {
     z-index: -1;
     height: 100%;
     width: 100%;
-    top: -20%;
     position: absolute;
     left: 0;
     padding: 0 20%;
@@ -301,16 +310,14 @@ md-champion {
     display: flex;
 
     .lane() {
-
-        height: 72.5%;
-        margin: 20% 0;
+        height: 74.5%;
+        margin: 8.5vh 0;
         flex: 1;
         position: relative;
     }
 
     .lane-top {
         .lane;
-        background-color: red;
 
         &.active {
             cursor: url('/public/img/CursorMove.cur'), pointer;
@@ -319,7 +326,6 @@ md-champion {
 
     .lane-mid {
         .lane;
-        background-color: blue;
 
         &.active {
             cursor: url('/public/img/CursorMove.cur'), pointer;
@@ -328,7 +334,6 @@ md-champion {
 
     .lane-bot {
         .lane;
-        background-color: green;
 
         &.active {
             cursor: url('/public/img/CursorMove.cur'), pointer;
@@ -341,6 +346,8 @@ md-champion {
         height: 50%;
         bottom: 0;
         display: flex;
+        padding-top: -5%;
+        box-sizing: border-box;
     }
 
     .lane-enemy {
@@ -349,5 +356,37 @@ md-champion {
         height: 50%;
         top: 0;
         display: flex;
+        padding-top: 15%;
+        box-sizing: border-box;
     }
+}
+
+.nexus-health-bar {
+    z-index: 0;
+    position: relative;
+    height: 5px;
+    width: 150px;
+    background-color: gray;
+    display: flex;
+    border: solid white 2px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.health-segment {
+    z-index: 1;
+    flex: 1;
+}
+
+.health-segment + .health-segment{
+    border-left: solid white 2px;
+}
+
+.current-health {
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: red;
+    transition: width 1s ease;
 }

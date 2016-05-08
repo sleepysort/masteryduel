@@ -51,8 +51,8 @@ export class GameService {
 		this.laneStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
 		this.enemyInhibStyles = [{isActive: false}, {isActive: false}, {isActive: false}];
 		this.initializeSockets();
-		this.enemyNexusHealth = { value: 5 };
-		this.playerNexusHealth = { value: 5 };
+		this.enemyNexusHealth = { value: -1 };
+		this.playerNexusHealth = { value: -1 };
 		this.currentTurnPlayer = { value: null };
 		this.currentTurnMovesLeft = { value: 0 };
 		this.controlChampId = null;
@@ -96,7 +96,7 @@ export class GameService {
 				MessageLogger.systemMessage('The game is starting!');
 
 				this.enemyNexusHealth.value = msg.nexusHealth;
-				this.enemyNexusHealth.value = msg.nexusHealth;
+				this.playerNexusHealth.value = msg.nexusHealth;
 				this.gameState.value = GameState.Started;
 				this.currentTurnPlayer.value = msg.starter;
 				this.turnNum.value = 1;
@@ -375,7 +375,13 @@ export class GameService {
 	}
 
 	private applyUpdateNexus(update: I.DataGameUpdate): void {
-		this.playerNexusHealth.value = update.nexus[this.playerId];
+		for (let playerId in update.nexus) {
+			if (playerId === this.playerId) {
+				this.playerNexusHealth.value = update.nexus[playerId];
+			} else {
+				this.enemyNexusHealth.value = update.nexus[playerId];
+			}
+		}
 	}
 
 	public addAllyToLane(champ: I.ChampionData, lane: I.Location) {
@@ -627,8 +633,8 @@ export class GameService {
 						enemyInLane = true;
 					}
 				}
-				if (!enemyInLane) {
-					this.enemyInhibStyles[this.champDict[this.queuedMove.uid].currentLocation - 2].isActive = true;
+				if (!enemyInLane && this.champDict[this.queuedMove.uid].currentLocation !== I.Location.Hand) {
+					this.enemyInhibStyles[this.champDict[this.queuedMove.uid].currentLocation].isActive = true;
 				}
 				break;
 			case "ability":
@@ -671,6 +677,9 @@ export class GameService {
 			case "attack":
 				for (let i = 0; i < this.activeChamps.length; i++) {
 					this.champStyles[this.activeChamps[i].uid].isActive = false;
+				}
+				for (let inhib of this.enemyInhibStyles) {
+					inhib.isActive = false;
 				}
 				break;
 		}
