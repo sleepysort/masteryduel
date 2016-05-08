@@ -1076,7 +1076,7 @@ class Ahri extends Champion {
 		this.ability = {
 			name: 'Charm',
 			description: 'Charms a target. The last charmed target will deal 15% less damage to Ahri' +
-						 'and take more 15% (' + Math.round(1.15 * this.dmg) + ') more damage from Ahri.',
+						 'and take 15% (' + Math.round(.15 * this.dmg) + ') more damage from Ahri.',
 			type: AbilityType.SingleEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -1180,7 +1180,7 @@ class Amumu extends Champion {
 		this.numAttacks = 0;
 		this.ability = {
 			name: 'Cursed Touch',
-			description: 'Amumu deals 15% increased damage on consecutive attacks (capped at 3) to the same target',
+			description: 'Each consecutive attack on the same target deals 15% bonus damage, up to 45%.',
 			type: AbilityType.Passive,
 			readyTurn: 0,
 			effect: null
@@ -1212,7 +1212,7 @@ class Anivia extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Frostbite',
-			description: 'Anivia deals 50% (' + Math.round(1.5 * this.dmg) + ') increased damage to stunned targets',
+			description: 'Anivia deals 50% (' + Math.round(.5 * this.dmg) + ') bonus damage to stunned targets',
 			type: AbilityType.Passive,
 			readyTurn: 0,
 			effect: null
@@ -1229,6 +1229,38 @@ class Anivia extends Champion {
 	}
 }
 championById[34] = Anivia;
+
+
+class Annie extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Bearhug',
+			description: 'Deals ' + Math.round(0.8 * this.dmg) + ' damage and stuns all enemies in the lane for 1 turn.',
+			type: AbilityType.AOEEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let annie = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(0.8 * annie.getDamage(), annie, game.getTurnNum())) {
+						update.killed.push({ uid: enemy.getUid(), killer: annie.getUid() });
+					} else {
+						enemy.stunnedTurn = game.getTurnNum() + 1;
+						update.affected.push({ uid: enemy.getUid(), status: Status.Stunned, turnNum: enemy.stunnedTurn });
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealt(), attacker: annie.getUid() });
+					}
+				}
+
+				annie.movedNum = game.getTurnNum();
+				update.movedNum = annie.movedNum;
+				return 7;
+			}
+		};
+	}
+}
+championById[1] = Annie;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------- B --------------------------------------------------------------------//
