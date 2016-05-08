@@ -968,8 +968,20 @@ export class Champion {
 		return this.maxHealth;
 	}
 
+	public addHealth(value: number): void {
+		this.health += value;
+	}
+
+	public addMaxHealth(value: number): void {
+		this.maxHealth += value;
+	}
+
 	public getDamage(): number {
 		return this.dmg;
+	}
+
+	public addDamage(value: number): void {
+		this.dmg += value;
 	}
 
 	public getChampId(): number {
@@ -1653,9 +1665,9 @@ class ChoGath extends Champion {
 
 				if (enemy.takeDamage(Math.round(1.5 * champ.getDamage()), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
-					var healthInc = 0.1 * this.maxHealth;
-					this.maxHealth += healthInc;
-					this.health += healthInc;
+					var healthInc = 0.1 * champ.getMaxHealth();
+					champ.addMaxHealth(healthInc);
+					champ.addHealth(healthInc);
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1757,6 +1769,65 @@ class Diana extends Champion {
 	}
 }
 championById[131] = Diana;
+
+
+class DrMundo extends Champion {
+	private abilityTurnNum: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.abilityTurnNum = 0;
+		this.ability = {
+			name: 'Sadism',
+			description: 'Recover 30% of max health over 2 turns',
+			type: AbilityType.Self,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				(<DrMundo>champ).abilityTurnNum = game.getTurnNum() + 2;
+				alistar.movedNum = game.getTurnNum();
+
+				return 7;
+			}
+		};
+	}
+	public takeDamage(dmg: number, enemy: Champion, turnNum: number): boolean {
+		if (turnNum <= this.abilityTurnNum) {
+			Math.min(this.maxHealth, Math.round(this.maxHealth * 0.15) + this.health);
+		}
+		return super.takeDamage(dmg, enemy, turnNum);
+	}
+}
+championById[36] = DrMundo;
+
+
+class Draven extends Champion {
+	baseDmg: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		baseDmg = this.dmg;
+		this.ability = {
+			name: 'Mastery of Draven',
+			description: 'Permanently gains 15% (' + Math.round(this.baseDmg * 0.15) + ') of base damage for every kill.',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: null;
+			}
+		};
+
+		public attackChamp(enemy: Champion, turnNum: number): boolean {
+			let killed = enemy.takeDamage(this.dmg, this, turnNum);
+			if (killed) {
+				champ.addDamage(Math.round(baseDmg * 0.15));
+			}
+			this.movedNum = turnNum;
+			return killed;
+		}
+	}
+}
+championById[119] = Draven;
+
 
 
 
