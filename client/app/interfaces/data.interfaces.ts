@@ -23,6 +23,7 @@ export interface ChampionData {
 	currentLocation: Location;
 	stunnedTurn: number;
 	invulnTurn: number;
+	stasisTurn: number;
 	movedNum: number;
 }
 
@@ -132,7 +133,8 @@ export enum ChampionTag {
 export enum Status {
 	None,
 	Stunned,
-	Invulnerable
+	Invulnerable,
+	Stasis
 }
 
 export enum AbilityType {

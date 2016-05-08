@@ -102,5 +102,6 @@ export enum ChampionTag {
 export enum Status {
 	None,
 	Stunned,
-	Invulnerable
+	Invulnerable,
+	Stasis
 }

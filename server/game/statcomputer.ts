@@ -14,7 +14,7 @@ export class StatComputer {
         // baseHealth, healthScale, baseDmg, dmgScale
         var stats = [];
         if (tag === I.ChampionTag.Assassin) {
-            stats = [30, 1.1, 10, 1.25];
+            stats = [30, 1.1, 10, 1.3];
         }
         else if (tag === I.ChampionTag.Fighter) {
             stats = [35, 1.2, 5, 1.2];
@@ -44,7 +44,7 @@ export class StatComputer {
             return Math.round(this.getStatByTag(primary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel));
             } else {
                 return Math.round((this.getStatByTag(primary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel) +
-                this.getStatByTag(secondary, index) * Math.pow(this.getStatByTag(primary, index+1), champLevel)) / 2);
+                this.getStatByTag(secondary, index) * Math.pow(this.getStatByTag(secondary, index+1), champLevel)) / 2);
             }
         }
     }
