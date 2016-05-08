@@ -45,7 +45,7 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
-	public onChat(event: KeyboardEvent): void {
+	public onMessageLogger(event: KeyboardEvent): void {
 		if (event.keyCode === 13) {  // Enter
 			this.game.send('gamechat', {
 				playerId: this.game.getPlayerId(),
