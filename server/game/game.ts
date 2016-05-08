@@ -208,6 +208,12 @@ export class Game {
 		return this.players[this.turnNum % this.players.length].getId();
 	}
 
+	/**
+	* @return the current turn number
+	*/
+	public getTurnNum(): number {
+		return this.turnNum;
+	}
 
 	/**
 	* @return the champion with the given uid; null if not found
@@ -1049,6 +1055,8 @@ class Thresh extends Champion {
 					uid: ally.getUid(),
 					location: ally.getLocation()
 				});
+
+				update.movedNum = game.getTurnNum();
 
 				return 7;
 			}
