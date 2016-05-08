@@ -706,15 +706,10 @@ export class Game {
 			throw new Error('This champion is stunned.');
 		}
 
-<<<<<<< HEAD
 		if (champ.getStasisTurn() >= this.turnNum) {
 			throw new Error('This champion is in stasis');
 		}
 
-		update.moved = [];
-
-=======
->>>>>>> 39dc3bd9e70142a1bb12dc1a98e037c5bd64b530
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.movedNum = this.turnNum;
