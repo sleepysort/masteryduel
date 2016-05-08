@@ -28,7 +28,7 @@ export interface ChampionData {
 
 export interface DataGameError {
 	errorCode: number;
-	message: string;
+	reason?: string;
 }
 
 export interface DataGameJoin {
@@ -140,7 +140,8 @@ export enum AbilityType {
 	Passive,
 	SingleEnemySameLane,
 	SingleEnemyAnyLane,
-	SingleAlly,
+	SingleAllySameLane,
+	SingleAllyAnyLane,
 	AOEEnemySameLane,
 	AOEAlly,
 	GlobalAlly,

@@ -216,6 +216,68 @@ export class Game {
 		return this.activeChamps[uid];
 	}
 
+	/**
+	* @return all enemy champions in the same lane as the given champion; empty array if none
+	*/
+	public getSameLaneEnemyChamps(uid: string): Champion[] {
+		let champ = this.activeChamps[uid];
+		let result: Champion[] = [];
+		for (let key in this.activeChamps) {
+			let curr = this.activeChamps[key];
+			if (curr.getOwner() !== champ.getOwner()
+					&& curr.getLocation() === champ.getLocation()) {
+				result.push(curr);
+			}
+		}
+		return result;
+	}
+
+	/**
+	* @return all allied champions in the same lane as the given champion; empty array if none
+	*/
+	public getSameLaneAllyChamps(uid: string): Champion[] {
+		let champ = this.activeChamps[uid];
+		let result: Champion[] = [];
+		for (let key in this.activeChamps) {
+			let curr = this.activeChamps[key];
+			if (curr.getOwner() === champ.getOwner()
+					&& curr.getLocation() === champ.getLocation()) {
+				result.push(curr);
+			}
+		}
+		return result;
+	}
+
+	/**
+	* @return all enemy champions of the given champion; empty array if none
+	*/
+	public getAllEnemyChamps(uid: string): Champion[] {
+		let champ = this.activeChamps[uid];
+		let result: Champion[] = [];
+		for (let key in this.activeChamps) {
+			let curr = this.activeChamps[key];
+			if (curr.getOwner() !== champ.getOwner()) {
+				result.push(curr);
+			}
+		}
+		return result;
+	}
+
+	/**
+	* @return all allied champions of the given champion; empty array if none
+	*/
+	public getAllAlliedChamps(uid: string): Champion[] {
+		let champ = this.activeChamps[uid];
+		let result: Champion[] = [];
+		for (let key in this.activeChamps) {
+			let curr = this.activeChamps[key];
+			if (curr.getOwner() === champ.getOwner()) {
+				result.push(curr);
+			}
+		}
+		return result;
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// Socket event listener helper methods
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -755,17 +817,17 @@ export class Player {
 * Representation of a champion/card in the game
 */
 export class Champion {
-	private champId: number;
-	private uid: string;
-	private champLevel: number;
-	private owner: string;
-	private health: number;
-	private maxHealth: number;
-	private dmg: number;
-	private ability: Ability;
-	private currentLocation: Location;
-	private stunnedTurn: number;
-	private invulnTurn: number;
+	protected champId: number;
+	protected uid: string;
+	protected champLevel: number;
+	protected owner: string;
+	protected health: number;
+	protected maxHealth: number;
+	protected dmg: number;
+	protected ability: Ability;
+	protected currentLocation: Location;
+	protected stunnedTurn: number;
+	protected invulnTurn: number;
 	public movedNum: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
@@ -780,7 +842,7 @@ export class Champion {
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
 		this.ability = {
-			effect: (game: Game, data: any, update: I.DataGameUpdate) => {
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let enemy = game.getChamp(data.targetUid);
 				enemy.stunnedTurn = game.getGameTurnNum() + 1;
 				update.affected.push({uid: data.targetUid, status: I.Status.Stunned, turnNum: enemy.stunnedTurn});
@@ -795,12 +857,12 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion): boolean {
-		enemy.takeDamage(this.dmg);
-		return enemy.health === 0;
+		return enemy.takeDamage(this.dmg);
 	}
 
-	public takeDamage(damage: number): void {
+	public takeDamage(damage: number): boolean {
 		this.health -= Math.min(damage, this.health);
+		return this.health === 0;
 	}
 
 	public getHealth(): number {
@@ -857,10 +919,14 @@ export class Champion {
 */
 export interface Ability {
 	/** Reference to the game, a target (if applicable, and the update object); returns the cooldown */
-	effect: (game: Game, data: any, update: any) => number;
-	readyTurn: number;  // cooldown; when game.turnNum >= readyTurn, ability can be used
+	effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => number;
+	/** Keeping track of the CURRENT cooldown. In otherwords, the turnNum when the ability will be re-enabled */
+	readyTurn: number;
+	/** Name of the ability */
 	name: string;
+	/** Description of the ability */
 	description: string;
+	/** Type of the ability */
 	type: AbilityType
 }
 
@@ -869,7 +935,8 @@ export enum AbilityType {
 	Passive,
 	SingleEnemySameLane,
 	SingleEnemyAnyLane,
-	SingleAlly,
+	SingleAllySameLane,
+	SingleAllyAnyLane,
 	AOEEnemySameLane,
 	AOEAlly,
 	GlobalAlly,
@@ -923,6 +990,95 @@ export class Deck {
 
 	public drawChampion(playerId: string): Champion {
 		let champRaw = this.champions.splice(Math.floor(this.champions.length * Math.random()), 1)[0];
-		return new Champion(playerId, champRaw.championId, champRaw.championLevel);
+		return createChampionById(playerId, champRaw.championId, champRaw.championLevel);
 	}
 }
+
+
+/*************************************************************
+* Champion definitions
+**************************************************************/
+let championById: {[id: number]: any} = {};
+
+function createChampionById(owner: string, champId: number, champLevel: number): Champion {
+	let c = championById[champId];
+	if (!c) {
+		return new Champion(owner, champId, champLevel);
+	} else {
+		return new c(owner, champId, champLevel);
+	}
+}
+
+/***********************************************************************
+* Steps to adding a champion:
+* 	1) Create a new class for the champion, and add a constructor
+*	2) Define the ability in the constructor
+*		a) name, description, type, readyTurn are all required
+			- readyTurn is NOT the cooldown. Set it to 0.
+*		b) If the ability is passive, set effect to null, and instead override the
+*		   takeDamage or attackChamp methods
+*		c) If the ability is an active, define it in effect. You should return the cooldown here.
+*			- MAKE SURE TO UPDATE THE update OBJECT!!!!!!
+*			- YOU MUST ALSO INITIALIZE THE CORRESPONDING ARRAY
+*	3) Add the class to the championById array at the index corresponding to the champion's ID number
+*
+*	Useful methods in game:
+*		- getChamp(uid)
+*		- getSameLaneAllyChamps(uid)
+*		- getSameLaneEnemyChamps(uid)
+*		- getAllAlliedChamps(uid)
+*		- getAllEnemyChamps(uid)
+*/
+
+class Thresh extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Dark Passage',
+			description: 'Pulls an ally from any lane into the same lane as Thresh.',
+			type: AbilityType.SingleAllyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let thresh = game.getChamp(data.sourceUid);
+				let ally = game.getChamp(data.targetUid);
+				ally.setLocation(thresh.getLocation());
+
+				update.moved = update.moved || [];
+
+				update.moved.push({
+					uid: ally.getUid(),
+					location: ally.getLocation()
+				});
+
+				return 7;
+			}
+		};
+	}
+}
+championById[412] = Thresh;
+
+
+class Lucian extends Champion {
+	private isBonusDamage: boolean;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Lightslinger',
+			description: 'Every second attack deals ' + Math.round(0.15 * this.dmg) + ' bonus damage.',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+		this.isBonusDamage = true;
+	}
+
+	public attackChamp(enemy: Champion): boolean {
+		let dmg = this.dmg;
+		if (this.isBonusDamage) {
+			dmg = Math.round(dmg * 1.15);
+		}
+		return enemy.takeDamage(dmg);
+	}
+}
+championById[236] = Lucian;

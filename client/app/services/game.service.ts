@@ -110,7 +110,7 @@ export class GameService {
 			});
 
 			this.sock.on('gameerror', (msg: I.DataGameError) => {
-				MessageLogger.systemMessage('Server sent an error: ' + msg.message);
+				MessageLogger.systemMessage('Server sent an error: ' + msg.reason);
 			});
 		});
 
@@ -503,7 +503,8 @@ export class GameService {
 
 		if (this.champDict[uid].ability.type === I.AbilityType.SingleEnemySameLane
 				|| this.champDict[uid].ability.type === I.AbilityType.SingleEnemyAnyLane
-				|| this.champDict[uid].ability.type === I.AbilityType.SingleAlly) {
+				|| this.champDict[uid].ability.type === I.AbilityType.SingleAllySameLane
+				|| this.champDict[uid].ability.type === I.AbilityType.SingleAllyAnyLane) {
 			this.queuedMove = { uid: uid, moveType: "ability"};
 			this.setValidTargets();
 			this.champStyles[uid].isSource = true;
@@ -658,11 +659,18 @@ export class GameService {
 							this.champStyles[curr.uid].isActive = true;
 						}
 					}
-				} else if (champAbility.type === I.AbilityType.SingleAlly) {
+				} else if (champAbility.type === I.AbilityType.SingleAllySameLane) {
 					for (let i = 0; i < this.activeChamps.length; i++) {
 						let curr = this.activeChamps[i];
 						if (this.champDict[this.queuedMove.uid].currentLocation === curr.currentLocation
 								&& curr.owner === this.playerId) {
+							this.champStyles[curr.uid].isActive = true;
+						}
+					}
+				} else if (champAbility.type === I.AbilityType.SingleAllyAnyLane) {
+					for (let i = 0; i < this.activeChamps.length; i++) {
+						let curr = this.activeChamps[i];
+						if (curr.owner === this.playerId) {
 							this.champStyles[curr.uid].isActive = true;
 						}
 					}

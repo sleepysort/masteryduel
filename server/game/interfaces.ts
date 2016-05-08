@@ -2,7 +2,7 @@ import g = require('./game');
 
 export interface DataGameError {
 	errorCode: number;
-	message: string;
+	reason?: string;
 }
 
 export interface DataGameJoin {
