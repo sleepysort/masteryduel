@@ -649,7 +649,8 @@ export class GameService {
 							this.champStyles[curr.uid].isActive = true;
 						}
 					}
-				} else if (champAbility.type === I.AbilityType.SingleEnemyAnyLane) {
+				} else if (champAbility.type === I.AbilityType.SingleEnemyAnyLane
+						|| champAbility.type === I.AbilityType.AOEEnemyAnyLane) {
 					for (let i = 0; i < this.activeChamps.length; i++) {
 						let curr = this.activeChamps[i];
 						if (curr.owner !== this.playerId
