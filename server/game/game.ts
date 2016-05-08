@@ -393,7 +393,14 @@ export class Game {
 			sourceUid: null,
 			moveCount: -1,
 			turnNum: -1,
-			turnPlayer: null
+			turnPlayer: null,
+			nexus: {},
+			killed: [],
+			damaged: [],
+			hand: [],
+			enemySpawn: [],
+			moved: [],
+			affected: []
 		};
 
 		if (player.getId() !== this.getCurrentTurnPlayerId()) {
@@ -501,7 +508,6 @@ export class Game {
 		update.movedNum = source.movedNum;
 
 		// Add data to update object
-		update.nexus = {};
 		update.nexus[opp.getId()] = opp.getHealth();
 	}
 
@@ -538,8 +544,8 @@ export class Game {
 			throw new Error('Cannot attack while stunned');
 		}
 
-		update.killed = [];
-		update.damaged = [];
+		// Keep track of health in case of lifesteal
+		let originalHealth = source.getHealth();
 
 		// If enemy is killed, send to fountain
 		if (source.attackEnemy(target)) {
@@ -553,6 +559,15 @@ export class Game {
 				attacker: source.getUid()
 			});
 		}
+
+		if (originalHealth !== source.getHealth()) {
+			update.damaged.push({
+				uid: source.getUid(),
+				health: source.getHealth(),
+				attacker: source.getUid()
+			});
+		}
+
 		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
@@ -581,7 +596,6 @@ export class Game {
 			throw new Error('Champion has already made a move this turn');
 		}
 
-		update.affected = [];
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
 		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
@@ -636,8 +650,6 @@ export class Game {
 			throw new Error('This champion is stunned.');
 		}
 
-		update.moved = [];
-
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.movedNum = this.turnNum;
@@ -663,9 +675,6 @@ export class Game {
 		if (champ.getOwner() !== player.getId()) {
 			throw new Error('Cannot move opponent champion');
 		}
-
-		opUpdate.enemySpawn = [];
-		update.hand = [];
 
 		opUpdate.enemySpawn.push(champ);
 		delete opUpdate.moved;

@@ -287,33 +287,31 @@ export class GameService {
 	}
 
 	public applyUpdate(update: I.DataGameUpdate): void {
-		if (update.moved) {
+		if (update.moved && update.moved.length !== 0) {
 			this.applyUpdateMove(update);
 		}
 
-		if (update.hand) {
+		if (update.hand && update.hand.length !== 0) {
 			this.applyUpdateHand(update);
 		}
 
-		if (update.enemySpawn) {
+		if (update.enemySpawn && update.enemySpawn.length !== 0) {
 			this.applyUpdateEnemySpawn(update);
 		}
 
-		if (update.damaged) {
+		if (update.damaged && update.damaged.length !== 0) {
 			this.applyUpdateDamaged(update);
 		}
 
-		if (update.killed) {
+		if (update.killed && update.killed.length !== 0) {
 			this.applyUpdateKilled(update);
 		}
 
-		if (update.affected) {
+		if (update.affected && update.affected.length !== 0) {
 			this.applyUpdateAffected(update);
 		}
 
-		if (update.nexus) {
-			this.applyUpdateNexus(update);
-		}
+		this.applyUpdateNexus(update);
 
 		this.currentTurnPlayer.value = update.turnPlayer;
 		this.champDict[update.sourceUid].movedNum = update.movedNum;
@@ -637,7 +635,7 @@ export class GameService {
 					}
 				}
 				if (!enemyInLane && this.champDict[this.queuedMove.uid].currentLocation !== I.Location.Hand) {
-					this.enemyInhibStyles[this.champDict[this.queuedMove.uid].currentLocation].isActive = true;
+					this.enemyInhibStyles[this.champDict[this.queuedMove.uid].currentLocation - 2].isActive = true;
 				}
 				break;
 			case "ability":
