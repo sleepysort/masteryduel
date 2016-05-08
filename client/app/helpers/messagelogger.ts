@@ -8,6 +8,7 @@ export class MessageLogger {
 		if (logger.length !== 0) {
 			logger.append('<p class="system-message">' + msg + '</p>');
 		}
+		MessageLogger.scrollToBottom();
 	}
 
 	public static playerChatMessage(msg: string): void {
@@ -15,6 +16,7 @@ export class MessageLogger {
 		if (logger.length !== 0) {
 			logger.append('<p class="player-message">You: ' + msg + '</p>');
 		}
+		MessageLogger.scrollToBottom();
 	}
 
 	public static opponentChatMessage(msg: string): void {
@@ -22,6 +24,7 @@ export class MessageLogger {
 		if (logger.length !== 0) {
 			logger.append('<p class="player-message">Opponent: ' + msg + '</p>');
 		}
+		MessageLogger.scrollToBottom();
 	}
 
 	public static scrollToBottom(): void {
