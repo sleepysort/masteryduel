@@ -370,6 +370,9 @@ export class GameService {
 				case I.Status.Invulnerable:
 					champ.invulnTurn = data.turnNum;
 					break;
+				case I.Status.Stasis:
+					champ.stasisTurn = data.turnNum;
+					break;
 			}
 		}
 	}
@@ -455,6 +458,11 @@ export class GameService {
 			return false;
 		}
 
+		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
+			MessageLogger.systemMessage('This champion is in stasis.');
+			return false;
+		}
+
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion has already made a move this turn.");
 			return false;
@@ -477,6 +485,11 @@ export class GameService {
 			return false;
 		}
 
+		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
+			MessageLogger.systemMessage('This champion is in stasis.');
+			return false;
+		}
+
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion has already made a move this turn.");
 			return false;
@@ -496,6 +509,11 @@ export class GameService {
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion is stunned.");
+			return false;
+		}
+
+		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
+			MessageLogger.systemMessage('This champion is in stasis.');
 			return false;
 		}
 
