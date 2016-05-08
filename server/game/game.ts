@@ -850,7 +850,7 @@ export class Champion {
 		this.ability = {
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let enemy = game.getChamp(data.targetUid);
-				enemy.stunnedTurn = game.getGameTurnNum() + 1;
+				enemy.setStunnedTurn(game.getGameTurnNum() + 1);
 				update.affected.push({uid: data.targetUid, status: I.Status.Stunned, turnNum: enemy.stunnedTurn});
 				return 5;
 			},
@@ -911,8 +911,16 @@ export class Champion {
 		return this.stunnedTurn;
 	}
 
+	public setStunnedTurn(turnNum: number): void {
+		this.stunnedTurn = turnNum;
+	}
+
 	public getInvulnTurn(): number {
 		return this.invulnTurn;
+	}
+
+	public setInvulnTurn(turnNum: number): void {
+		this.invulnTurn = turnNum;
 	}
 
 	public getAbility(): Ability {
@@ -1150,8 +1158,6 @@ class Alistar extends Champion {
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let alistar = game.getChamp(data.sourceUid);
-				let enemy = game.getChamp(data.targetUid);
-
 				(<Alistar>alistar).abilityTurnNum = game.getTurnNum() + 3;
 				alistar.movedNum = game.getTurnNum();
 				update.movedNum = alistar.movedNum;
@@ -1247,9 +1253,9 @@ class Annie extends Champion {
 					if (enemy.takeDamage(0.8 * annie.getDamage(), annie, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: annie.getUid() });
 					} else {
-						enemy.stunnedTurn = game.getTurnNum() + 1;
-						update.affected.push({ uid: enemy.getUid(), status: Status.Stunned, turnNum: enemy.stunnedTurn });
-						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealt(), attacker: annie.getUid() });
+						enemy.setStunnedTurn(game.getTurnNum() + 1);
+						update.affected.push({ uid: enemy.getUid(), status: I.Status.Stunned, turnNum: enemy.getStunnedTurn() });
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: annie.getUid() });
 					}
 				}
 
@@ -1261,6 +1267,37 @@ class Annie extends Champion {
 	}
 }
 championById[1] = Annie;
+
+
+class Ashe extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Enchanted Crystal Arrow',
+			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage and stuns the target. Can target enemy in any lane.',
+			type: AbilityType.GlobalEnemy,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let ashe = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(1.1 * ashe.getDamage(), ashe, game.getTurnNum())) {
+					update.killed.push({ uid: enemy.getUid(), killer: ashe.getUid() });
+				} else {
+					enemy.setStunnedTurn(game.getTurnNum() + 1);
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Stunned, turnNum: enemy.getStunnedTurn() });
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: ashe.getUid() });
+				}
+
+				ashe.movedNum = game.getTurnNum();
+				update.movedNum = ashe.movedNum;
+				return 6;
+			}
+		};
+	}
+}
+championById[22] = Ashe;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------- B --------------------------------------------------------------------//
