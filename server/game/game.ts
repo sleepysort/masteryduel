@@ -620,7 +620,6 @@ export class Game {
 			});
 		}
 
-		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
 
@@ -653,7 +652,6 @@ export class Game {
 		}
 
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
-		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
 	}
 
@@ -712,14 +710,13 @@ export class Game {
 
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
-		champ.movedNum = this.turnNum;
-		update.movedNum = champ.movedNum;
-
-		champ.setLocation(data.targetLocation);
+		champ.setLocation(data.targetLocation, this.turnNum);
 		update.moved.push({
 			uid: champ.getUid(),
 			location: champ.getLocation()
 		});
+
+		update.movedNum = champ.movedNum;
 
 		return wasFromHand;
 	}
@@ -988,7 +985,8 @@ export class Champion {
 		return this.currentLocation;
 	}
 
-	public setLocation(loc: Location): void {
+	public setLocation(loc: Location, turnNum: number): void {
+		this.movedNum = turnNum;
 		this.currentLocation = loc;
 	}
 
@@ -1511,7 +1509,7 @@ class Blitzcrank extends Champion {
 				if (enemy.takeDamage(Math.round(champ.getDamage() * 1.5), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
-					enemy.setLocation(champ.getLocation());
+					enemy.setLocation(champ.getLocation(), game.getTurnNum());
 					update.moved.push({
 						uid: enemy.getUid(),
 						location: enemy.getLocation()
@@ -1688,7 +1686,7 @@ class Thresh extends Champion {
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let thresh = game.getChamp(data.sourceUid);
 				let ally = game.getChamp(data.targetUid);
-				ally.setLocation(thresh.getLocation());
+				ally.setLocation(thresh.getLocation(), game.getTurnNum());
 
 				update.moved = update.moved || [];
 
