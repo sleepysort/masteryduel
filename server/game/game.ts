@@ -208,6 +208,12 @@ export class Game {
 		return this.players[this.turnNum % this.players.length].getId();
 	}
 
+	/**
+	* @return the current turn number
+	*/
+	public getTurnNum(): number {
+		return this.turnNum;
+	}
 
 	/**
 	* @return the champion with the given uid; null if not found
@@ -352,7 +358,7 @@ export class Game {
 		this.turnNum = 1;
 		this.movesCount = 2;
 		for (let i = 0; i < this.players.length; i++) {
-			this.players[i].initializeHand(5, this.activeChamps);
+			this.players[i].initializeHand(this, 5, this.activeChamps);
 			this.players[i].getSocket().emit('gameinit', {
 				hand: this.getHand(this.players[i].getId()),
 				starter: this.getCurrentTurnPlayerId(),
@@ -387,14 +393,7 @@ export class Game {
 			sourceUid: null,
 			moveCount: -1,
 			turnNum: -1,
-			turnPlayer: null,
-			nexus: {},
-			killed: [],
-			damaged: [],
-			hand: [],
-			enemySpawn: [],
-			moved: [],
-			affected: []
+			turnPlayer: null
 		};
 
 		if (player.getId() !== this.getCurrentTurnPlayerId()) {
@@ -502,6 +501,7 @@ export class Game {
 		update.movedNum = source.movedNum;
 
 		// Add data to update object
+		update.nexus = {};
 		update.nexus[opp.getId()] = opp.getHealth();
 	}
 
@@ -538,8 +538,8 @@ export class Game {
 			throw new Error('Cannot attack while stunned');
 		}
 
-		// Keep track of health in case of lifesteal
-		let originalHealth = source.getHealth();
+		update.killed = [];
+		update.damaged = [];
 
 		// If enemy is killed, send to fountain
 		if (source.attackEnemy(target)) {
@@ -553,15 +553,6 @@ export class Game {
 				attacker: source.getUid()
 			});
 		}
-
-		if (originalHealth !== source.getHealth()) {
-			update.damaged.push({
-				uid: source.getUid(),
-				health: source.getHealth(),
-				attacker: source.getUid()
-			});
-		}
-
 		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
@@ -590,7 +581,8 @@ export class Game {
 			throw new Error('Champion has already made a move this turn');
 		}
 
-		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
+		update.affected = [];
+		champ.getAbility().readyTurn = champ.getAbility().effect(data, update) + this.turnNum;
 		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
 	}
@@ -644,6 +636,8 @@ export class Game {
 			throw new Error('This champion is stunned.');
 		}
 
+		update.moved = [];
+
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
 		champ.movedNum = this.turnNum;
@@ -670,9 +664,12 @@ export class Game {
 			throw new Error('Cannot move opponent champion');
 		}
 
+		opUpdate.enemySpawn = [];
+		update.hand = [];
+
 		opUpdate.enemySpawn.push(champ);
 		delete opUpdate.moved;
-		let drawnChamp = player.getDeck().drawChampion(player.getId());
+		let drawnChamp = player.getDeck().drawChampion(this, player.getId());
 		this.activeChamps[drawnChamp.getUid()] = drawnChamp;
 		update.hand.push(drawnChamp);
 	}
@@ -762,9 +759,9 @@ export class Player {
 	* @param count 			the number of cards to start off in the hand
 	* @param activeChamps	a reference to the game's activeChampion dictionary
 	*/
-	public initializeHand(count: number, activeChamps: any): void {
+	public initializeHand(game: Game, count: number, activeChamps: any): void {
 		for (let i = 0; i < count; i++) {
-			let c = this.deck.drawChampion(this.id);
+			let c = this.deck.drawChampion(game, this.id);
 			activeChamps[c.getUid()] = c;
 		}
 	}
@@ -837,9 +834,11 @@ export class Champion {
 	protected currentLocation: Location;
 	protected stunnedTurn: number;
 	protected invulnTurn: number;
+	protected game: Game;
 	public movedNum: number;
 
-	constructor(owner: string, champId: number, champLevel: number) {
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		this.game = game;
 		this.uid = generator.generateId(8);
 		this.champId = champId;
 		this.champLevel = champLevel;
@@ -851,7 +850,7 @@ export class Champion {
 		this.stunnedTurn = 0;
 		this.invulnTurn = 0;
 		this.ability = {
-			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+			effect: (data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let enemy = game.getChamp(data.targetUid);
 				enemy.stunnedTurn = game.getGameTurnNum() + 1;
 				update.affected.push({uid: data.targetUid, status: I.Status.Stunned, turnNum: enemy.stunnedTurn});
@@ -866,10 +865,10 @@ export class Champion {
 
 	/** Return true if enemy is killed */
 	public attackEnemy(enemy: Champion): boolean {
-		return enemy.takeDamage(this.dmg);
+		return enemy.takeDamage(this.dmg, this);
 	}
 
-	public takeDamage(damage: number): boolean {
+	public takeDamage(damage: number, attacker: Champion): boolean {
 		this.health -= Math.min(damage, this.health);
 		return this.health === 0;
 	}
@@ -928,7 +927,7 @@ export class Champion {
 */
 export interface Ability {
 	/** Reference to the game, a target (if applicable, and the update object); returns the cooldown */
-	effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => number;
+	effect: (data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => number;
 	/** Keeping track of the CURRENT cooldown. In otherwords, the turnNum when the ability will be re-enabled */
 	readyTurn: number;
 	/** Name of the ability */
@@ -997,9 +996,9 @@ export class Deck {
 		});
 	}
 
-	public drawChampion(playerId: string): Champion {
+	public drawChampion(game: Game, playerId: string): Champion {
 		let champRaw = this.champions.splice(Math.floor(this.champions.length * Math.random()), 1)[0];
-		return createChampionById(playerId, champRaw.championId, champRaw.championLevel);
+		return createChampionById(game, playerId, champRaw.championId, champRaw.championLevel);
 	}
 }
 
@@ -1009,12 +1008,12 @@ export class Deck {
 **************************************************************/
 let championById: {[id: number]: any} = {};
 
-function createChampionById(owner: string, champId: number, champLevel: number): Champion {
+function createChampionById(game: Game, owner: string, champId: number, champLevel: number): Champion {
 	let c = championById[champId];
 	if (!c) {
-		return new Champion(owner, champId, champLevel);
+		return new Champion(game, owner, champId, champLevel);
 	} else {
-		return new c(owner, champId, champLevel);
+		return new c(game, owner, champId, champLevel);
 	}
 }
 
@@ -1039,25 +1038,124 @@ function createChampionById(owner: string, champId: number, champLevel: number):
 *		- getAllEnemyChamps(uid)
 */
 
+class Aatrox extends Champion {
+	private currentTurn: number;
+
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		super(game, owner, champId, champLevel);
+		this.ability = {
+			name: 'Blood Thirst',
+			description: 'Every third attack heals for ' + Math.round(0.1 * this.maxHealth) + '.',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+		this.currentTurn = 0;
+	}
+
+	public attackEnemy(enemy: Champion): boolean {
+		this.currentTurn++;
+		if (this.currentTurn === 3) {
+			this.health = Math.min(this.maxHealth, Math.round(this.maxHealth * 0.1) + this.health);
+			this.currentTurn = 0;
+		}
+		return enemy.takeDamage(this.dmg, this);
+	}
+}
+championById[266] = Aatrox;
+
+class Ahri extends Champion {
+	private charmedTargetUid: string;
+
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		super(game, owner, champId, champLevel);
+		this.ability = {
+			name: 'Charm',
+			description: 'Charms a target. Charmed targets deal less damage to Ahri and take more damage from Ahri.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let ahri = this.game.getChamp(data.sourceUid);
+				let enemy = this.game.getChamp(data.targetUid);
+				this.charmedTargetUid = data.targetUid;
+
+				ahri.movedNum = this.game.getTurnNum();
+				update.movedNum = ahri.movedNum;
+
+				return 1;
+			}
+		};
+	}
+
+	public attackEnemy(enemy: Champion): boolean {
+		let dmg = this.dmg;
+
+		if (enemy.getUid() === this.charmedTargetUid) {
+			dmg = Math.round(dmg * 1.15);
+		}
+		return enemy.takeDamage(dmg, this);
+	}
+
+	public takeDamage(dmg: number, enemy: Champion): boolean {
+		if (enemy.getUid() === this.charmedTargetUid) {
+			dmg = Math.round(dmg * 0.85);
+		}
+		this.health = Math.max(0, this.health - dmg);
+
+		return this.health === 0;
+	}
+}
+championById[103] = Ahri;
+
+class Akali extends Champion {
+
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		super(game, owner, champId, champLevel);
+		this.ability = {
+			name: 'Shadow Dance',
+			description: 'Akali\'s move for the turn resets on kill',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+	}
+
+	public attackChamp(enemy: Champion): boolean {
+		let killed = enemy.takeDamage(this.dmg, this);
+		if (killed) {
+			this.movedNum = this.game.getTurnNum() - 1;
+		}
+		return killed;
+	}
+}
+championById[84] = Akali;
+
+
+class Alistar extends Champion {
+
+}
+
+
 class Thresh extends Champion {
-	constructor(owner: string, champId: number, champLevel: number) {
-		super(owner, champId, champLevel);
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		super(game, owner, champId, champLevel);
 		this.ability = {
 			name: 'Dark Passage',
 			description: 'Pulls an ally from any lane into the same lane as Thresh.',
 			type: AbilityType.SingleAllyAnyLane,
 			readyTurn: 0,
-			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
-				let thresh = game.getChamp(data.sourceUid);
-				let ally = game.getChamp(data.targetUid);
+			effect: (data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let thresh = this.game.getChamp(data.sourceUid);
+				let ally = this.game.getChamp(data.targetUid);
 				ally.setLocation(thresh.getLocation());
-
-				update.moved = update.moved || [];
 
 				update.moved.push({
 					uid: ally.getUid(),
 					location: ally.getLocation()
 				});
+
+				thresh.movedNum = game.getTurnNum();
+				update.movedNum = thresh.movedNum;
 
 				return 7;
 			}
@@ -1066,12 +1164,11 @@ class Thresh extends Champion {
 }
 championById[412] = Thresh;
 
-
 class Lucian extends Champion {
 	private isBonusDamage: boolean;
 
-	constructor(owner: string, champId: number, champLevel: number) {
-		super(owner, champId, champLevel);
+	constructor(game: Game, owner: string, champId: number, champLevel: number) {
+		super(game, owner, champId, champLevel);
 		this.ability = {
 			name: 'Lightslinger',
 			description: 'Every second attack deals ' + Math.round(0.15 * this.dmg) + ' bonus damage.',
@@ -1084,10 +1181,13 @@ class Lucian extends Champion {
 
 	public attackChamp(enemy: Champion): boolean {
 		let dmg = this.dmg;
+
 		if (this.isBonusDamage) {
 			dmg = Math.round(dmg * 1.15);
 		}
-		return enemy.takeDamage(dmg);
+		this.isBonusDamage = !this.isBonusDamage;
+
+		return enemy.takeDamage(dmg, this);
 	}
 }
 championById[236] = Lucian;
