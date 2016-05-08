@@ -373,6 +373,9 @@ export class GameService {
 				case I.Status.Stasis:
 					champ.stasisTurn = data.turnNum;
 					break;
+				case I.Status.DamageReduction:
+					champ.statusEndTurn[I.Status.DamageReduction] = data.turnNum;
+					break;
 			}
 		}
 	}

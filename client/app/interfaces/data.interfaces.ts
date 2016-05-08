@@ -24,6 +24,7 @@ export interface ChampionData {
 	stunnedTurn: number;
 	invulnTurn: number;
 	stasisTurn: number;
+	statusEndTurn: {[status: number]: number};
 	movedNum: number;
 }
 
@@ -134,7 +135,8 @@ export enum Status {
 	None,
 	Stunned,
 	Invulnerable,
-	Stasis
+	Stasis,
+	DamageReduction
 }
 
 export enum AbilityType {
