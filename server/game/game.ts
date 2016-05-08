@@ -620,6 +620,7 @@ export class Game {
 			});
 		}
 
+		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 	}
 
@@ -652,6 +653,7 @@ export class Game {
 		}
 
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
+		champ.movedNum = this.turnNum;
 		update.movedNum = champ.movedNum;
 	}
 
@@ -710,13 +712,14 @@ export class Game {
 
 		let wasFromHand: boolean = champ.getLocation() === Location.Hand;
 
-		champ.setLocation(data.targetLocation, this.turnNum);
+		champ.movedNum = this.turnNum;
+		update.movedNum = champ.movedNum;
+
+		champ.setLocation(data.targetLocation);
 		update.moved.push({
 			uid: champ.getUid(),
 			location: champ.getLocation()
 		});
-
-		update.movedNum = champ.movedNum;
 
 		return wasFromHand;
 	}
@@ -985,8 +988,7 @@ export class Champion {
 		return this.currentLocation;
 	}
 
-	public setLocation(loc: Location, turnNum: number): void {
-		this.movedNum = turnNum;
+	public setLocation(loc: Location): void {
 		this.currentLocation = loc;
 	}
 
@@ -1170,6 +1172,7 @@ class Aatrox extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		this.currentTurn++;
+		this.movedNum = turnNum;
 		if (this.currentTurn === 3) {
 			this.health = Math.min(this.maxHealth, Math.round(this.maxHealth * 0.1) + this.health);
 			this.currentTurn = 0;
@@ -1197,7 +1200,6 @@ class Ahri extends Champion {
 				this.charmedTargetUid = data.targetUid;
 
 				ahri.movedNum = game.getTurnNum();
-				update.movedNum = ahri.movedNum;
 
 				return 1;
 			}
@@ -1206,10 +1208,10 @@ class Ahri extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
-
 		if (enemy.getUid() === this.charmedTargetUid) {
 			dmg = Math.round(dmg * 1.15);
 		}
+		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
 	}
 
@@ -1241,6 +1243,8 @@ class Akali extends Champion {
 		let killed = enemy.takeDamage(this.dmg, this, turnNum);
 		if (killed) {
 			this.movedNum = turnNum - 1;
+		} else {
+			this.movedNum = turnNum;
 		}
 		return killed;
 	}
@@ -1263,7 +1267,6 @@ class Alistar extends Champion {
 				let alistar = game.getChamp(data.sourceUid);
 				(<Alistar>alistar).abilityTurnNum = game.getTurnNum() + 3;
 				alistar.movedNum = game.getTurnNum();
-				update.movedNum = alistar.movedNum;
 
 				return 7;
 			}
@@ -1309,6 +1312,7 @@ class Amumu extends Champion {
 			this.attackedTargetUid = enemy.getUid();
 			this.numAttacks = 0;
 		}
+		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
 	}
 }
@@ -1333,6 +1337,7 @@ class Anivia extends Champion {
 		if (enemy.getStunnedTurn() >= turnNum) {
 			dmg = Math.round(dmg * 1.5);
 		}
+		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
 	}
 }
@@ -1362,7 +1367,6 @@ class Annie extends Champion {
 				}
 
 				annie.movedNum = game.getTurnNum();
-				update.movedNum = annie.movedNum;
 				return 7;
 			}
 		};
@@ -1392,7 +1396,6 @@ class Ashe extends Champion {
 				}
 
 				ashe.movedNum = game.getTurnNum();
-				update.movedNum = ashe.movedNum;
 				return 6;
 			}
 		};
@@ -1424,7 +1427,6 @@ class AurelionSol extends Champion {
 				}
 
 				aSol.movedNum = game.getTurnNum();
-				update.movedNum = aSol.movedNum;
 				return 9;
 			}
 		};
@@ -1453,7 +1455,6 @@ class Azir extends Champion {
 				}
 
 				azir.movedNum = game.getTurnNum();
-				update.movedNum = azir.movedNum;
 				return 7;
 			}
 		};
@@ -1485,7 +1486,6 @@ class Bard extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 6;
 			}
 		};
@@ -1509,7 +1509,7 @@ class Blitzcrank extends Champion {
 				if (enemy.takeDamage(Math.round(champ.getDamage() * 1.5), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
-					enemy.setLocation(champ.getLocation(), game.getTurnNum());
+					enemy.setLocation(champ.getLocation());
 					update.moved.push({
 						uid: enemy.getUid(),
 						location: enemy.getLocation()
@@ -1517,7 +1517,6 @@ class Blitzcrank extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 
 				return 6;
 			}
@@ -1547,7 +1546,6 @@ class Brand extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 6;
 			}
 		};
@@ -1575,7 +1573,6 @@ class Braum extends Champion {
 					update.affected.push({ uid: ally.getUid(), status: I.Status.DamageReduction, turnNum: game.getTurnNum() + 1 });
 				}
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 5;
 			}
 		};
@@ -1605,7 +1602,6 @@ class Caitlin extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 5;
 			}
 		};
@@ -1635,7 +1631,6 @@ class Cassiopeia extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 4;
 			}
 		};
@@ -1664,7 +1659,6 @@ class ChoGath extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 7;
 			}
 		};
@@ -1694,7 +1688,6 @@ class Corki extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 3;
 			}
 		};
@@ -1728,7 +1721,6 @@ class Darius extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return cd;
 			}
 		};
@@ -1758,7 +1750,6 @@ class Diana extends Champion {
 				}
 
 				champ.movedNum = game.getTurnNum();
-				update.movedNum = champ.movedNum;
 				return 4;
 			}
 		};
@@ -1766,6 +1757,8 @@ class Diana extends Champion {
 	}
 }
 championById[131] = Diana;
+
+
 
 
 class Thresh extends Champion {
@@ -1779,16 +1772,14 @@ class Thresh extends Champion {
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let thresh = game.getChamp(data.sourceUid);
 				let ally = game.getChamp(data.targetUid);
-				ally.setLocation(thresh.getLocation(), game.getTurnNum());
-
-				update.moved = update.moved || [];
+				ally.setLocation(thresh.getLocation());
 
 				update.moved.push({
 					uid: ally.getUid(),
 					location: ally.getLocation()
 				});
 
-				update.movedNum = game.getTurnNum();
+				thresh.movedNum = game.getTurnNum();
 
 				return 7;
 			}
@@ -1819,7 +1810,7 @@ class Lucian extends Champion {
 			dmg = Math.round(dmg * 1.15);
 		}
 		this.isBonusDamage = !this.isBonusDamage;
-
+		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
 	}
 }
