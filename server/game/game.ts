@@ -2167,10 +2167,7 @@ class Galio extends Champion {
 					if (ally.getUid() != champ.getUid()) {
 						ally.setInvulnTurn(game.getTurnNum() + 1);
 						update.affected.push({ uid: ally.getUid(), status: I.Status.Invulnerable, turnNum: game.getTurnNum() + 1 });
-					} else {
-						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
-
 				}
 				champ.movedNum = game.getTurnNum();
 				return 6;
@@ -2483,14 +2480,14 @@ class Janna extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Eye of the Storm',
-			description: 'Shield self or ally for 25% of Janna\'s max health (' + Math.round(0.25 * this.maxHealth) + ') and increase target\'s damage by 25%',
+			description: 'Shield self or ally for 20% of Janna\'s max health (' + Math.round(0.25 * this.maxHealth) + ') and increase target\'s damage by 25%',
 			type: AbilityType.SingleAllySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
 				let target = game.getChamp(data.targetUid);
-				champ.setShield(game.getTurnNum() + 1, Math.round(0.25 * champ.getMaxHealth()), 1)
-				champ.setDamageBuff(game.getTurnNum() + 1, 0.25, 1);
+				target.setShield(game.getTurnNum() + 1, Math.round(0.2 * champ.getMaxHealth()), 1)
+				target.setDamageBuff(game.getTurnNum() + 1, 0.25, 1);
 				champ.movedNum = game.getTurnNum();
 				return 5;
 			}
