@@ -14,10 +14,10 @@ export class StatComputer {
         // baseHealth, healthScale, baseDmg, dmgScale
         var stats = [];
         if (tag === I.ChampionTag.Assassin) {
-            stats = [30, 1.1, 10, 1.35];
+            stats = [30, 1.1, 9, 1.3];
         }
         else if (tag === I.ChampionTag.Fighter) {
-            stats = [34, 1.2, 5, 1.3];
+            stats = [34, 1.2, 6, 1.3];
         }
         else if (tag === I.ChampionTag.Mage) {
             stats = [30, 1.2, 7, 1.25];
@@ -26,10 +26,10 @@ export class StatComputer {
             stats = [30, 1.15, 8, 1.35];
         }
         else if (tag === I.ChampionTag.Support) {
-            stats = [32, 1.2, 3, 1.2];
+            stats = [32, 1.2, 4, 1.2];
         }
         else if (tag === I.ChampionTag.Tank) {
-            stats = [38, 1.3, 4, 1.2];
+            stats = [38, 1.3, 5, 1.2];
         }
         return stats[index];
     }
