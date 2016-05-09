@@ -12,9 +12,9 @@ export function getSummonerId(name: string): Promise.IThenable<{summonerId: numb
 		}
 		request.get(options, (err, response, body) => {
 			if (err) {
-				reject(response);
+				reject("Could not connect to League of Legends server.");
 			} else if (!body[name] || !body[name].id) {
-				reject(response);
+				reject("Could not find summoner with the given name.");
 			} else {
 				resolve({
 					summonerId: body[name].id,

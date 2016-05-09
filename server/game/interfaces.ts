@@ -76,6 +76,7 @@ export interface DataGameUpdate {
 	enemySpawn?: g.Champion[];
 	moved?: { uid: string, location: g.Location }[];
 	affected?: { uid: string, status: Status, turnNum: number }[];
+	cooldown?: { uid: string, readyTurn: number }[];
 
 	/** The turn number of the champion */
 	movedNum?: number;

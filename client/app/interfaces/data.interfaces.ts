@@ -104,6 +104,7 @@ export interface DataGameUpdate {
 	enemySpawn?: ChampionData[];
 	moved?: { uid: string, location: Location }[];
 	affected?: { uid: string, status: Status, turnNum: number }[];
+	cooldown?: { uid: string, readyTurn: number }[];
 	movedNum?: number;
 
 	turnNum: number;
