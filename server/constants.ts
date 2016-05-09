@@ -14,3 +14,5 @@ export const LOL_API_KEY: string = 'api_key=c0e7cfb6-55b2-45f3-9ed6-f9eaacda4fb9
 
 export const MAX_PLAYERS: number = 2;
 export const NEXUS_STARTING_HEALTH: number = 5;
+
+export const TURN_TIMER = 75;

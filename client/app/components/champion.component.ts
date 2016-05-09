@@ -24,6 +24,8 @@ export class ChampionComponent implements OnInit {
 	public champImgUrl: string;
 	public styles: Style;
 
+	public currentTurnNum: Wrapper<number>;
+
 	constructor(private game: GameService, private lolapi: LolApiService) {
 	}
 
@@ -31,6 +33,7 @@ export class ChampionComponent implements OnInit {
 		this.champName = this.lolapi.getChampionDtoById(this.champData.champId).name;
 		this.champImgUrl = this.lolapi.getChampionImageUrl(this.champData.champId);
 		this.styles = this.game.getChampStyle(this.champData.uid);
+		this.currentTurnNum = this.game.getCurrentTurnNum();
 	}
 
 	public toggleControls(): void {
@@ -71,6 +74,7 @@ export class ChampionComponent implements OnInit {
 	}
 
 	public onChampionClick(event: Event): void {
+		console.log(this.champData.statusEndTurn);
 		if (this.game.getQueuedMove() && this.styles.isActive) {
 			this.game.registerChampionClick(this.champData.uid);
 		} else if (this.game.getQueuedMove && this.styles.isSource) {

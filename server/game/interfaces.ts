@@ -67,6 +67,10 @@ export interface DataGameMove {
 	};
 }
 
+export interface DataGamePass {
+	playerId: string;
+}
+
 export interface DataGameUpdate {
 	sourceUid: string;
 	nexus?: {[playerId: string]: number};
@@ -76,6 +80,8 @@ export interface DataGameUpdate {
 	enemySpawn?: g.Champion[];
 	moved?: { uid: string, location: g.Location }[];
 	affected?: { uid: string, status: Status, turnNum: number }[];
+	cooldown?: { uid: string, readyTurn: number }[];
+	damageChange?: { uid: string, dmg: number }[];
 
 	/** The turn number of the champion */
 	movedNum?: number;
@@ -109,5 +115,6 @@ export enum Status {
 	Invulnerable,
 	Stasis,
 	DamageReduction,
-	Shielded
+	Shielded,
+	DamageBuff
 }
