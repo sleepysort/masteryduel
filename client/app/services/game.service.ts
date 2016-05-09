@@ -367,12 +367,16 @@ export class GameService {
 			this.applyUpdateHand(update);
 		}
 
-		if (update.nexus) {
-			this.applyUpdateNexus(update);
+		if (update.cooldown && update.cooldown.length !== 0) {
+			this.applyUpdateCooldown(update);
 		}
 
-		if (update.cooldown) {
-			this.applyUpdateCooldown(update);
+		if (update.damageChange && update.damageChange.length !== 0) {
+			this.applyUpdateDamageChange(update);
+		}
+
+		if (update.nexus) {
+			this.applyUpdateNexus(update);
 		}
 
 		this.isPlayerTurn.value = update.turnPlayer === this.playerId ? 1 : -1 ;
@@ -452,6 +456,12 @@ export class GameService {
 					champ.statusEndTurn[I.Status.DamageBuff] = data.turnNum;
 					break;
 			}
+		}
+	}
+
+	private applyUpdateDamageChange(update: I.DataGameUpdate): void {
+		for (let champ of update.damageChange) {
+			this.champDict[champ.uid].dmg = champ.dmg;
 		}
 	}
 

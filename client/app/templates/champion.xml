@@ -3,10 +3,10 @@
         <img class="status" src="/public/img/StatusStunned.png" [hidden]="champData.stunnedTurn<currentTurnNum.value"/>
         <img class="status" src="/public/img/StatusInvuln.png" [hidden]="champData.invulnTurn<currentTurnNum.value"/>
         <img class="status" src="/public/img/StatusStasis.png" [hidden]="champData.stasisTurn<currentTurnNum.value"/>
-        <!-- 4 is the status enum for dmg buff -->
-        <img class="status" src="/public/img/StatusDmgBuff.png" [hidden]="!champData.statusEndTurn[4] || champData.statusEndTurn[4] < currentTurnNum.value"/>
-        <!-- 6 is the status enum for dmg reduction -->
-        <img class="status" src="/public/img/StatusDmgReduce.png" [hidden]="!champData.statusEndTurn[6] || champData.statusEndTurn[6] < currentTurnNum.value"/>
+        <!-- 4 is the status enum for dmg reduction -->
+        <img class="status" src="/public/img/StatusDmgReduce.png" [hidden]="!champData.statusEndTurn[4] || champData.statusEndTurn[4] < currentTurnNum.value"/>
+        <!-- 6 is the status enum for dmg buff -->
+        <img class="status" src="/public/img/StatusDmgBuff.png" [hidden]="!champData.statusEndTurn[6] || champData.statusEndTurn[6] < currentTurnNum.value"/>
     </div>
     <div class="champ-name">{{champName}}</div>
     <div class="champ-card">

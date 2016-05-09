@@ -24,6 +24,7 @@
 	</div>
 </div>
 <div *ngIf="gameState.value===3" class="turn-clock">{{timeleft.value}}</div>
+<div *ngIf="gameState.value===3" class="pass-button" (click)="onPassButtonClick($event)">Pass</div>
 <div *ngIf="gameState.value===3" class="nexus-player">
 	<div class="player-turn-indicator" [hidden]="isPlayerTurn.value !== 1">
 		<div class="turn-text">Your turn</div>

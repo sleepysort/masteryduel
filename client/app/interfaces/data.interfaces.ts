@@ -109,6 +109,7 @@ export interface DataGameUpdate {
 	moved?: { uid: string, location: Location }[];
 	affected?: { uid: string, status: Status, turnNum: number }[];
 	cooldown?: { uid: string, readyTurn: number }[];
+	damageChange?: { uid: string, dmg: number }[];
 	movedNum?: number;
 
 	turnNum: number;

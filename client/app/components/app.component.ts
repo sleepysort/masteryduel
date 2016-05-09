@@ -50,6 +50,12 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
+	public onPassButtonClick(event: Event) {
+		if (this.isPlayerTurn.value === 1) {
+			this.game.send('gamepass', {playerId: this.game.getPlayerId()});
+		}
+	}
+
 	public getPlayerIconUrl(): string {
 		return this.lolApi.getSummonerIconUrl(this.game.getPlayerIconNumber());
 	}
