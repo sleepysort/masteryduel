@@ -347,6 +347,10 @@ export class GameService {
 			this.applyUpdateNexus(update);
 		}
 
+		if (update.cooldown) {
+			this.applyUpdateCooldown(update);
+		}
+
 		this.isPlayerTurn.value = update.turnPlayer === this.playerId ? 1 : -1 ;
 
 		// Ignore for debug
@@ -434,6 +438,12 @@ export class GameService {
 			} else {
 				this.enemyNexusHealth.value = update.nexus[playerId];
 			}
+		}
+	}
+
+	private applyUpdateCooldown(update: I.DataGameUpdate): void {
+		for (let a of update.cooldown) {
+			this.champDict[a.uid].ability.readyTurn = a.readyTurn;
 		}
 	}
 
@@ -554,6 +564,11 @@ export class GameService {
 	public registerChampionAbility(uid: string): boolean {
 		if (this.queuedMove) {
 			MessageLogger.systemMessage('Another champion is already trying to make a move.');
+			return false;
+		}
+
+		if (this.champDict[uid].ability.readyTurn >= this.turnNum.value) {
+			MessageLogger.systemMessage('This ability is on cooldown.');
 			return false;
 		}
 

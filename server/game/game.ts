@@ -54,6 +54,9 @@ export class Game {
 	/** The players in this game */
 	private players: Player[];
 
+	/** Turn timer */
+	private turnTimer: number;
+
 	/**
 	* @param the game id for this game
 	*/
@@ -120,13 +123,14 @@ export class Game {
 			this.onAll('gameselect', (msg: I.DataGameSelect) => {
 				let player = this.getPlayer(msg.playerId);
 
-				Logger.log(Logger.Tag.Game, 'Attempting to load deck \'' + msg.summonerName + '\' for player ' + player.getId(), this.gameId);
-
 				// Get the summoner id from name, then load mastery data, then load the deck.
 				// If all players are loaded, initialize the game.
 				fetcher.getSummonerId(msg.summonerName)
 						.then(fetcher.getSummonerDeck)
 						.then((value: {icon: number, name: string, body: I.ChampionMinData[]}) => {
+							if (value.body.length < 15) {
+								throw 'This summoner does not have the minimum number of mastered champions to play (15).';
+							}
 							player.setDeck(Deck.createDeck(value.name, value.body));
 
 							Logger.log(Logger.Tag.Game, 'Successfully loaded deck \'' + msg.summonerName + '\' for player ' + player.getId(), this.gameId);
@@ -148,10 +152,9 @@ export class Game {
 								this.onAll('gamemove', (move: I.DataGameMove) => {
 									this.applyMove(move);
 								});
-
 							}
 						}).catch((err) => {
-							player.getSocket().emit('gameerror', {reason: "Failed to load deck."});
+							player.getSocket().emit('gameerror', {reason: err});
 						});
 			});
 
@@ -191,6 +194,11 @@ export class Game {
 
 
 		return newPlayerId;
+	}
+
+	public turnoverHandler = () => {
+		this.turnNum++;
+
 	}
 
 	/**
@@ -440,6 +448,13 @@ export class Game {
 		if (player === null) return;
 		let opponent = this.getOpponent(move.playerId);
 
+		if (player.getId() !== this.getCurrentTurnPlayerId()) {
+			player.getSocket().emit('gameerror', {
+				reason: 'It is not your turn to make a move.',
+			});
+			return;
+		}
+
 		let update: I.DataGameUpdate = {
 			sourceUid: null,
 			moveCount: -1,
@@ -451,15 +466,9 @@ export class Game {
 			hand: [],
 			enemySpawn: [],
 			moved: [],
-			affected: []
+			affected: [],
+			cooldown: []
 		};
-
-		if (player.getId() !== this.getCurrentTurnPlayerId()) {
-			player.getSocket().emit('gameerror', {
-				reason: 'It is not your turn to make a move.',
-			});
-			return;
-		}
 
 		let wasFromHand = false;
 
@@ -662,6 +671,7 @@ export class Game {
 		}
 
 		champ.getAbility().readyTurn = champ.getAbility().effect(this, data, update) + this.turnNum;
+		update.cooldown.push({ uid: champ.getUid() , readyTurn: champ.getAbility().readyTurn });
 		update.movedNum = champ.movedNum;
 	}
 
@@ -790,7 +800,7 @@ export class Player {
 		this.health = constants.NEXUS_STARTING_HEALTH;
 		this.deck = null;
 		this.ready = false;
-		this.invulnTurn = 3;  // Players cannot take damage until turn 3
+		this.invulnTurn = 0;  // Players cannot take damage until turn 3
 		this.fountain = [];
 		this.iconNumber = 0;
 	}
