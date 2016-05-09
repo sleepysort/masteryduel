@@ -2099,7 +2099,7 @@ class Fiora extends Champion {
 		this.numAttacks = 0;
 		this.ability = {
 			name: 'Expose Weakness',
-			description: 'Each consecutive attack on the same target deals 15% bonus damage, up to 45%.',
+			description: 'Each consecutive attack on the same target deals 15% bonus damage, up to 60%.',
 			type: AbilityType.Passive,
 			readyTurn: 0,
 			effect: null
@@ -2112,11 +2112,11 @@ class Fiora extends Champion {
 			this.attackedTargetUid = enemy.getUid();
 		}
 		if (enemy.getUid() === this.attackedTargetUid) {
-			if (this.numAttacks < 3) {
+			if (this.numAttacks < 4) {
 				dmg = Math.round(dmg * Math.pow(1.15, this.numAttacks));
 				this.numAttacks++;
 			} else {
-				dmg = Math.round(dmg * Math.pow(1.15, 3));
+				dmg = Math.round(dmg * Math.pow(1.15, 4));
 			}
 		} else {
 			this.attackedTargetUid = enemy.getUid();
@@ -2250,13 +2250,16 @@ championById[86] = Garen;
 
 
 class Gnar extends Champion {
-	private currentTurn: number;
+	private numAttacks: number;
+	private attackedTargetUid: string;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
+		this.numAttacks = 0;
+		this.attackedTargetUid = "";
 		this.ability = {
 			name: 'Hyper',
-			description: 'Every third attack deals bonus damage equal to 10% of the target\'s max health (' + Math.round(0.1 * this.maxHealth) + ').',
+			description: 'Every third attack on the same target deals bonus damage equal to 15% of the target\'s max health.',
 			type: AbilityType.Passive,
 			readyTurn: 0,
 			effect: null
@@ -2266,10 +2269,18 @@ class Gnar extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
-		this.currentTurn++;
-		if (this.currentTurn === 3) {
-			this.dmg += Math.round(enemy.getMaxHealth() * 0.1);
-			this.currentTurn = 0;
+		if (this.attackedTargetUid === "") {
+			this.attackedTargetUid = enemy.getUid();
+		}
+		if (enemy.getUid() === this.attackedTargetUid) {
+			if (this.numAttacks < 3) {
+				this.numAttacks++;
+			} else {
+				dmg += Math.round(0.15 * enemy.getMaxHealth());
+			}
+		} else {
+			this.attackedTargetUid = enemy.getUid();
+			this.numAttacks = 0;
 		}
 		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
@@ -2438,7 +2449,7 @@ class Illaoi extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Tentacle Smash',
-			description: 'Deals ' + Math.round(.8 * this.dmg) + ' to all enemies in the lane and heals Illaoi equal to 10% of max health (' + Math.round(.08 * this.maxHealth) + ') for every enemy in the lane.',
+			description: 'Deals ' + Math.round(0.95 * this.dmg) + ' to all enemies in the lane and heals Illaoi equal to 10% of max health (' + Math.round(.08 * this.maxHealth) + ') for every enemy in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2447,7 +2458,7 @@ class Illaoi extends Champion {
 				let numEnemies = game.getSameLaneEnemyChamps(data.sourceUid).length;
 
 				for (let enemy of enemies) {
-					if (enemy.takeDamage(Math.round(0.8 * champ.getDamage()), champ, game.getTurnNum())) {
+					if (enemy.takeDamage(Math.round(0.95 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					} else {
 						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
@@ -2505,6 +2516,65 @@ class Janna extends Champion {
 	}
 }
 championById[40] = Janna;
+
+class JarvanIV extends Champion {
+	baseDmg: number;
+	enemiesHit: string[];
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.enemiesHit = [];
+		this.baseDmg = this.dmg;
+		this.ability = {
+			name: 'Martial Cadence',
+			description: 'For each new target, Jarvan IV deals 20% of the target\'s current health as bonus damage.'
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		}
+	};
+
+	public attackChamp(enemy: Champion, turnNum: number): boolean {
+		let dmg = this.dmg;
+		if (enemiesHit.indexOf(enemy.getUid()) < 0) {
+			dmg += Math.round(0.2 * enemy.getHealth());
+			enemiesHit.push(enemy.getUid());
+		}
+
+		this.movedNum = turnNum;
+		return enemy.takeDamage(dmg, this, turnNum);
+	}
+}
+
+
+
+class Jax extends Champion {
+	private currentTurn: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Grandmaster\'s Might',
+			description: 'Every third attack deals 20% bonus damage (' + Math.round(0.2 * this.dmg) + ').',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+		this.currentTurn = 0;
+	}
+
+	public attackEnemy(enemy: Champion, turnNum: number): boolean {
+		this.currentTurn++;
+		this.movedNum = turnNum;
+		let dmg = this.dmg;
+		if (this.currentTurn === 3) {
+			dmg += Math.round(0.2 * this.dmg);
+			this.currentTurn = 0;
+		}
+		return enemy.takeDamage(dmg, this, turnNum);
+	}
+}
+championById[24] = Jax;
 
 
 class Thresh extends Champion {
