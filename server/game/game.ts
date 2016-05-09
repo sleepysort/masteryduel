@@ -1370,6 +1370,7 @@ class Alistar extends Champion {
 				(<Alistar>champ).abilityTurnNum = game.getTurnNum() + 3;
 				champ.movedNum = game.getTurnNum();
 				champ.setDamageBuff(game.getTurnNum() + 1, 2, 3);
+				update.affected.push({uid: champ.getUid(), status: I.Status.DamageBuff, turnNum: game.getTurnNum() + 1});
 				return 7;
 			}
 		};
@@ -2032,6 +2033,7 @@ class Evelynn extends Champion {
 
 				}
 				champ.setShield(game.getTurnNum() + 1, Math.round(champ.getMaxHealth() * Math.pow(1.1, numEnemies)), 1);
+				update.affected.push({uid: champ.getUid(), status: I.Status.Shielded, turnNum: game.getTurnNum() + 1});
 				champ.movedNum = game.getTurnNum();
 				return 5;
 			}
@@ -2502,6 +2504,7 @@ class Irelia extends Champion {
 				let champ = game.getChamp(data.sourceUid);
 
 				champ.setDamageBuff(game.getTurnNum() + 1, 0.3, 3);
+				update.affected.push({uid: champ.getUid(), status: I.Status.DamageBuff, turnNum: game.getTurnNum() + 1});
 				champ.movedNum = game.getTurnNum();
 				return 5;
 			}
@@ -2528,7 +2531,9 @@ class Janna extends Champion {
 				let champ = game.getChamp(data.sourceUid);
 				let target = game.getChamp(data.targetUid);
 				target.setShield(game.getTurnNum() + 1, Math.round(0.2 * champ.getMaxHealth()), 1)
+				update.affected.push({uid: target.getUid(), status: I.Status.Shielded, turnNum: game.getTurnNum() + 1});
 				target.setDamageBuff(game.getTurnNum() + 1, 0.25, 1);
+				update.affected.push({uid: target.getUid(), status: I.Status.DamageBuff, turnNum: game.getTurnNum() + 1});
 				champ.movedNum = game.getTurnNum();
 				return 5;
 			}
