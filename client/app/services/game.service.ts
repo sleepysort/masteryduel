@@ -40,6 +40,12 @@ export class GameService {
 	/** Champion that is currently clicked to show controls */
 	private controlChampId: string;
 
+	/** How much time is left in the turn */
+	private timeleft: Wrapper<number>;
+
+	/** The interval id of the timer */
+	private timerInterval: number;
+
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
 		this.turnNum = { value: 0 };
@@ -65,6 +71,7 @@ export class GameService {
 		this.enemyIconNumber = 0;
 		this.playerSummonerName = '';
 		this.enemySummonerName = '';
+		this.timeleft = { value: 0 };
 	}
 
 	private initializeSockets(): void {
@@ -118,11 +125,18 @@ export class GameService {
 				this.gameState.value = GameState.Started;
 
 				this.currentTurnMovesLeft.value = 2;
+
+				this.timeleft.value = 75;
+				this.timerInterval = setInterval(this.intervalHandler, 1000);
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
 				console.log(msg);
 				this.applyUpdate(msg);
+
+				this.timeleft.value = 75;
+				clearInterval(this.timerInterval);
+				this.timerInterval = setInterval(this.intervalHandler, 1000);
 			});
 
 			this.sock.on('gameerror', (msg: I.DataGameError) => {
@@ -132,6 +146,12 @@ export class GameService {
 
 		let joinData: I.DataGameJoin = {gameId: this.getGameId()};
 		this.sock.emit('gamejoin', joinData);
+	}
+
+	public intervalHandler = () => {
+		if (this.timeleft.value !== 0) {
+			this.timeleft.value--;
+		}
 	}
 
 	public getGameId(): string {
@@ -235,6 +255,10 @@ export class GameService {
 
 	public getEnemySummonerName(): string {
 		return this.enemySummonerName;
+	}
+
+	public getTimeLeft(): Wrapper<number> {
+		return this.timeleft;
 	}
 
 	public setControlChamp(uid: string): void {

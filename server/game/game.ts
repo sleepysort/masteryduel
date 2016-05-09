@@ -55,7 +55,7 @@ export class Game {
 	private players: Player[];
 
 	/** Turn timer */
-	private turnTimer: number;
+	private turnTimer: NodeJS.Timer;
 
 	/**
 	* @param the game id for this game
@@ -192,13 +192,21 @@ export class Game {
 			}
 		}
 
-
 		return newPlayerId;
 	}
 
-	public turnoverHandler = () => {
+	public intervalHandler = () => {
 		this.turnNum++;
+		this.movesCount = 3;
 
+		let update: I.DataGameUpdate = {
+			sourceUid: null,
+			moveCount: this.movesCount,
+			turnNum: this.turnNum,
+			turnPlayer: this.getCurrentTurnPlayerId()
+		};
+
+		this.emitAll('gameupdate', update);
 	}
 
 	/**
@@ -424,6 +432,8 @@ export class Game {
 				nexusHealth: constants.NEXUS_STARTING_HEALTH
 			});
 		}
+
+		this.turnTimer = setInterval(this.intervalHandler, constants.TURN_TIMER * 1000);  // 1 second additional buffer
 	}
 
 	/**
@@ -496,6 +506,9 @@ export class Game {
 			return;
 		}
 
+		// Was a valid move, unset the timer
+		clearInterval(this.turnTimer);
+
 		// Lol. If you look at this and not laugh, something is wrong with you.
 		let opUpdate = JSON.parse(JSON.stringify(update));
 		if (wasFromHand) {
@@ -521,6 +534,9 @@ export class Game {
 
 		player.getSocket().emit('gameupdate', update);
 		opponent.getSocket().emit('gameupdate', opUpdate);
+
+		// Reset the timer
+		this.turnTimer = setInterval(this.intervalHandler, constants.TURN_TIMER * 1000);
 	}
 
 	/**

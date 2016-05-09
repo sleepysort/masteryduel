@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
 	public enemyNexusHealth: Wrapper<number>;
 	public isPlayerTurn: Wrapper<number>;
 	public moveCount: Wrapper<number>;
+	public timeleft: Wrapper<number>;
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
 		this.enemyNexusHealth = this.game.getEnemyNexusHealth();
 		this.isPlayerTurn = this.game.getIsPlayerTurn();
 		this.moveCount = this.game.getCurrentTurnMovesLeft();
+		this.timeleft = this.game.getTimeLeft();
 	}
 
 	public sendMessage(): void {
