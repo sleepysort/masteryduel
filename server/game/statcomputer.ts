@@ -20,7 +20,7 @@ export class StatComputer {
             stats = [34, 1.2, 5, 1.3];
         }
         else if (tag === I.ChampionTag.Mage) {
-            stats = [30, 1.2, 7, 1.15];
+            stats = [30, 1.2, 7, 1.25];
         }
         else if (tag === I.ChampionTag.Marksman) {
             stats = [30, 1.15, 8, 1.35];
