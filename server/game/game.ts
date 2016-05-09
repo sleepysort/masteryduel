@@ -949,13 +949,15 @@ export class Champion {
 
 	public takeDamage(damage: number, attacker: Champion, turnNum: number): boolean {
 		this.updateStatus(this, turnNum);
-		let dmg = damage * (1 + attacker.damageBuff) * (1 - this.damageReduction);
-		if (dmg > this.shield) {
-			dmg -= this.shield;
-			this.shield = 0;
-		} else {
-			this.shield -= damage;
-			dmg = 0;
+		let dmg = Math.round(damage * (1 + attacker.damageBuff) * (1 - this.damageReduction));
+		if (this.shield > 0) {
+			if (dmg > this.shield) {
+				dmg -= this.shield;
+				this.shield = 0;
+			} else {
+				this.shield -= damage;
+				dmg = 0;
+			}
 		}
 		this.health -= (Math.min(dmg, this.health));
 		return this.health === 0;
@@ -1209,6 +1211,7 @@ function createChampionById(owner: string, champId: number, champLevel: number):
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------------------------------------------------------   A   ------------------------------------------------------------------//
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class Aatrox extends Champion {
 	private currentTurn: number;
 
@@ -1342,6 +1345,7 @@ class Amumu extends Champion {
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
+		this.attackedTargetUid = "";
 		this.numAttacks = 0;
 		this.ability = {
 			name: 'Cursed Touch',
@@ -1354,7 +1358,9 @@ class Amumu extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
-
+		if (this.attackedTargetUid === "") {
+			this.attackedTargetUid = enemy.getUid();
+		}
 		if (enemy.getUid() === this.attackedTargetUid) {
 			if (this.numAttacks < 3) {
 				dmg = Math.round(dmg * Math.pow(1.15, this.numAttacks));
@@ -1494,21 +1500,23 @@ class Azir extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Emperor\'s Order',
-			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 10% (' + Math.round(.1 * this.dmg) + ') bonus damage for every ally in the lane to all enemies in the lane.',
+			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 20% (' + Math.round(.2 * this.dmg) + ') bonus damage for every ally in the lane to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
-				let azir = game.getChamp(data.sourceUid);
+				let champ = game.getChamp(data.sourceUid);
 				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
-				let numAllies = game.getSameLaneAllyChamps(data.sourceUid).length - 1;
+				let numAllies = 1;
 
 				for (let enemy of enemies) {
-					if (enemy.takeDamage(Math.round(1.1 * azir.getDamage() * Math.pow(1.1, numAllies)), azir, game.getTurnNum())) {
-						update.killed.push({ uid: enemy.getUid(), killer: azir.getUid() });
+					if (enemy.takeDamage(Math.round(1.1 * champ.getDamage() * Math.pow(1.2, numAllies)), champ, game.getTurnNum())) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
 				}
 
-				azir.movedNum = game.getTurnNum();
+				champ.movedNum = game.getTurnNum();
 				return 7;
 			}
 		};
@@ -1563,6 +1571,7 @@ class Blitzcrank extends Champion {
 				if (enemy.takeDamage(Math.round(champ.getDamage() * 1.5), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					enemy.setLocation(champ.getLocation());
 					update.moved.push({
 						uid: enemy.getUid(),
@@ -1585,7 +1594,7 @@ class Brand extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Pyroclasm',
-			description: 'Deals ' + Math.round(this.dmg) + ' damage plus 10% (' + Math.round(.1 * this.dmg) + ') bonus damage for every enemy in the lane to all enemies in the lane.',
+			description: 'Deals ' + Math.round(this.dmg) + ' damage plus 20% (' + Math.round(.2 * this.dmg) + ') bonus damage for every enemy in the lane to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -1594,8 +1603,10 @@ class Brand extends Champion {
 				let numEnemies = game.getSameLaneEnemyChamps(data.sourceUid).length;
 
 				for (let enemy of enemies) {
-					if (enemy.takeDamage(Math.round(champ.getDamage() * Math.pow(1.1, numEnemies)), champ, game.getTurnNum())) {
+					if (enemy.takeDamage(Math.round(champ.getDamage() * Math.pow(1.2, numEnemies)), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
 				}
 
@@ -2022,6 +2033,7 @@ class Fiora extends Champion {
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
+		this.attackedTargetUid = "";
 		this.numAttacks = 0;
 		this.ability = {
 			name: 'Expose Weakness',
@@ -2034,7 +2046,9 @@ class Fiora extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		let dmg = this.dmg;
-
+		if (this.attackedTargetUid === "") {
+			this.attackedTargetUid = enemy.getUid();
+		}
 		if (enemy.getUid() === this.attackedTargetUid) {
 			if (this.numAttacks < 3) {
 				dmg = Math.round(dmg * Math.pow(1.15, this.numAttacks));
@@ -2170,7 +2184,7 @@ class Gnar extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Blood Thirst',
+			name: 'Hyper',
 			description: 'Every third attack deals bonus damage equal to 10% of the target\'s max health (' + Math.round(0.1 * this.maxHealth) + ').',
 			type: AbilityType.Passive,
 			readyTurn: 0,
@@ -2374,7 +2388,7 @@ class Irelia extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Hiten Style',
-			description: 'For the next 3 turns, Irelia deals ' + (Math.round(0.3 * this.dmg)) + 'bonus damage on her attacks.',
+			description: 'For the next 3 turns, Irelia deals ' + (Math.round(0.3 * this.dmg)) + ' bonus damage on her attacks.',
 			type: AbilityType.Self,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
