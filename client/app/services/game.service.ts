@@ -387,6 +387,9 @@ export class GameService {
 				case I.Status.Shielded:
 					champ.statusEndTurn[I.Status.Shielded] = data.turnNum;
 					break;
+				case I.Status.DamageBuff:
+					champ.statusEndTurn[I.Status.DamageBuff] = data.turnNum;
+					break;
 			}
 		}
 	}
