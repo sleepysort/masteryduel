@@ -61,6 +61,10 @@ export interface DataGameInit {
 	hand: ChampionData[];
 	starter: string;
 	nexusHealth: number;
+	playerIcon: number;
+	enemyIcon: number;
+	playerSummonerName: string;
+	enemySummonerName: string;
 }
 
 export interface DataGameMove {

@@ -44,6 +44,11 @@
 		</div>
 	</div>
 	<div class="drawer" [class.drawer-opened]="isDrawerOpen">
+		<div class="message-logger">
+			<div class="message-logger-content">
+			</div>
+			<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onMessageLogger($event)"/>
+		</div>
 		<div class="drawer-toggle-btn" (click)="onDrawerButtonClicked($event)">
 			<img src="/public/img/caret.png" />
 		</div>

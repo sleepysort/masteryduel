@@ -30,7 +30,7 @@ export class MessageLogger {
 	public static scrollToBottom(): void {
 		let logger = $(MESSAGE_LOGGER_SELECTOR);
 		if (logger.length !== 0) {
-			logger.scrollTop(logger.innerHeight());
+			logger.scrollTop(logger[0].scrollHeight);
 		}
 	}
 }
