@@ -980,7 +980,7 @@ export class Champion {
 
 	public updateStatus(champ: Champion, turnNum: number): void {
 		for (let index in this.statusEndTurn) {
-			if (turnNum < this.statusEndTurn[index]) {
+			if (turnNum >= this.statusEndTurn[index]) {
 				let currStatus: I.Status = parseInt(index);
 
 				switch(currStatus) {
@@ -1683,6 +1683,8 @@ class Caitlin extends Champion {
 
 				if (enemy.takeDamage(Math.round(1.4 * champ.getDamage()), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1710,8 +1712,9 @@ class Cassiopeia extends Champion {
 					if (enemy.takeDamage(champ.getDamage(), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					} else {
-
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1740,7 +1743,10 @@ class ChoGath extends Champion {
 					var healthInc = 0.15 * champ.getMaxHealth();
 					champ.addMaxHealth(healthInc);
 					champ.addHealth(healthInc);
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return 5;
@@ -1768,7 +1774,10 @@ class Corki extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.75 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1802,7 +1811,10 @@ class Darius extends Champion {
 				if (enemy.takeDamage(dmg, champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					cd = 1;
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return cd;
@@ -1830,7 +1842,10 @@ class Diana extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(1.25 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1859,8 +1874,14 @@ class DrMundo extends Champion {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					if (champ.takeDamage(champ.getMaxHealth() * 0.05, champ, game.getTurnNum())) {
 						update.killed.push({ uid: champ.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: champ.getUid(), health: champ.getHealth(), attacker: champ.getUid() });
 					}
+
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 				champ.movedNum = game.getTurnNum();
 
 				return 1;
@@ -1949,7 +1970,10 @@ class Elise extends Champion {
 
 				if (enemy.takeDamage(dmg, champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return 4;
@@ -1976,7 +2000,10 @@ class Evelynn extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.75 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 				champ.setShield(game.getTurnNum() + 1, Math.round(champ.getMaxHealth() * Math.pow(1.1, numEnemies)), 1);
 				champ.movedNum = game.getTurnNum();
@@ -2003,7 +2030,10 @@ class Ezreal extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.8 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -2035,7 +2065,10 @@ class Fiddlesticks extends Champion {
 				if (enemy.takeDamage(Math.round(0.85 * champ.getDamage()), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					champ.addHealth(Math.min(Math.round(0.85 * champ.getDamage()), champ.getHealth()));
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return 3;
@@ -2100,7 +2133,10 @@ class Fizz extends Champion {
 
 				if (enemy.takeDamage(Math.round(1.5 * champ.getDamage()), champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return 5;
@@ -2131,7 +2167,10 @@ class Galio extends Champion {
 					if (ally.getUid() != champ.getUid()) {
 						ally.setInvulnTurn(game.getTurnNum() + 1);
 						update.affected.push({ uid: ally.getUid(), status: I.Status.Invulnerable, turnNum: game.getTurnNum() + 1 });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 				champ.movedNum = game.getTurnNum();
 				return 6;
@@ -2157,7 +2196,10 @@ class Gangplank extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage((Math.round((Math.random() * 0.26) + 0.75) * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -2186,7 +2228,10 @@ class Garen extends Champion {
 
 				if (enemy.takeDamage(dmg, champ, game.getTurnNum())) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
+
 
 				champ.movedNum = game.getTurnNum();
 				return 4;
@@ -2245,6 +2290,7 @@ class Gragas extends Champion {
 					if (enemy.takeDamage(Math.round(0.4 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 						if (blastOff) {
 							if (enemy.getLocation() === Location.LaneTop) {
 								enemy.setLocation(Location.LaneMid);
@@ -2291,7 +2337,10 @@ class Graves extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.85 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -2355,7 +2404,10 @@ class Heimerdinger extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.95 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -2390,7 +2442,10 @@ class Illaoi extends Champion {
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(Math.round(0.8 * champ.getDamage()), champ, game.getTurnNum())) {
 						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
+
 				}
 				champ.addHealth(Math.round(champ.getMaxHealth() * Math.pow(1.1, numEnemies)));
 				champ.movedNum = game.getTurnNum();
@@ -2421,6 +2476,28 @@ class Irelia extends Champion {
 	}
 }
 championById[39] = Irelia;
+
+
+class Janna extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Eye of the Storm',
+			description: 'Shield self or ally for 25% of Janna\'s max health (' + Math.round(0.25 * this.maxHealth) + ') and increase target\'s damage by 25%',
+			type: AbilityType.SingleAllySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let target = game.getChamp(data.targetUid);
+				champ.setShield(game.getTurnNum() + 1, Math.round(0.25 * champ.getMaxHealth()), 1)
+				champ.setDamageBuff(game.getTurnNum() + 1, 0.25, 1);
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+}
+championById[40] = Janna;
 
 
 class Thresh extends Champion {

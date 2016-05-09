@@ -23,8 +23,6 @@ export class AppComponent implements OnInit {
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
 	public enemyNexusHealth: Wrapper<number>;
-	public isPlayerTurn: Wrapper<number>;
-	public moveCount: Wrapper<number>;
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
@@ -32,8 +30,6 @@ export class AppComponent implements OnInit {
 		this.gameState = this.game.getGameState();
 		this.playerNexusHealth = this.game.getPlayerNexusHealth();
 		this.enemyNexusHealth = this.game.getEnemyNexusHealth();
-		this.isPlayerTurn = this.game.getIsPlayerTurn();
-		this.moveCount = this.game.getCurrentTurnMovesLeft();
 	}
 
 	public sendMessage(): void {
@@ -48,19 +44,21 @@ export class AppComponent implements OnInit {
 		this.game.send('gameselect', msg);
 	}
 
-	public getPlayerIconUrl(): string {
-		return this.lolApi.getSummonerIconUrl(this.game.getPlayerIconNumber());
-	}
-
-	public getEnemyIconUrl(): string {
-		return this.lolApi.getSummonerIconUrl(this.game.getEnemyIconNumber());
-	}
-
-	public getPlayerSummonerName(): string {
-		return this.game.getPlayerSummonerName();
-	}
-
-	public getEnemySummonerName(): string {
-		return this.game.getEnemySummonerName();
+	public onMessageLogger(event: KeyboardEvent): void {
+		if (event.keyCode === 13) {  // Enter
+			let msg: string = $('.message-logger-input').val();
+			if (msg.indexOf('@debug') === 0) {
+				this.game.send('gamedebug', {
+					playerId: this.game.getPlayerId(),
+					spawn: msg.substr(7).split(' ').map(val => parseInt(val))
+				});
+			} else {
+				this.game.send('gamechat', {
+					playerId: this.game.getPlayerId(),
+					text: msg
+				});
+			}
+			$('.message-logger-input').val('');
+		}
 	}
 }
