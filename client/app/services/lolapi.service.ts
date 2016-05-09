@@ -19,7 +19,7 @@ export class LolApiService {
 
 	public getChampions(): Promise<Dictionary<ChampionDto>> {
 		return new Promise<Dictionary<ChampionDto>>((resolve, reject) => {
-			$.getJSON('http://localhost:8000/lolapi/champions', (res: any) => {
+			$.getJSON('http://40.118.209.159:8000/lolapi/champions', (res: any) => {
 				if (!('data' in res)) {
 					reject(res.status.status_code);
 				}

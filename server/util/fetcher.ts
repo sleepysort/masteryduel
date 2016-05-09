@@ -1,11 +1,12 @@
 import Promise = require('promise');
 import request = require('request');
 import constants = require('../constants');
+import apikey = require('../apikey');
 
 export function getSummonerId(name: string): Promise.IThenable<{summonerId: number, icon: number}> {
 	return new Promise((resolve, reject) => {
 		name = name.replace(/ /g, '');
-		let reqUrl = constants.LOL_API_URL + '/api/lol/na/v1.4/summoner/by-name/' + name + '?' + constants.LOL_API_KEY;
+		let reqUrl = constants.LOL_API_URL + '/api/lol/na/v1.4/summoner/by-name/' + name + '?' + apikey.LOL_API_KEY;
 		let options = {
 			uri: reqUrl,
 			json: true
@@ -28,7 +29,7 @@ export function getSummonerId(name: string): Promise.IThenable<{summonerId: numb
 
 export function getSummonerDeck(data: {summonerId: number, summonerName: string, icon: number}): Promise.IThenable<{icon: number, body: any[]}> {
 	return new Promise((resolve, reject) => {
-		let reqUrl = constants.LOL_API_URL + '/championmastery/location/na1/player/' + data.summonerId + '/champions?' + constants.LOL_API_KEY;
+		let reqUrl = constants.LOL_API_URL + '/championmastery/location/na1/player/' + data.summonerId + '/champions?' + apikey.LOL_API_KEY;
 		let options = {
 			uri: reqUrl,
 			json: true

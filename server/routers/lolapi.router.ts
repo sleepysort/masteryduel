@@ -2,6 +2,7 @@ import express = require('express');
 import https = require('https');
 import constants = require('../constants');
 import request = require('request');
+import apikey = require('../apikey');
 
 let apiRouter = express.Router();
 
@@ -14,7 +15,7 @@ apiRouter.get('/full/*', (req: express.Request, res: express.Response) => {
 	for (let key in req.query) {
 		query += key + '=' + req.query[key] + '&';
 	}
-	query += constants.LOL_API_KEY;
+	query += apikey.LOL_API_KEY;
 
 	let options = {
 		uri: constants.LOL_API_URL + req.path.substr(5) + '?' + query,
@@ -39,7 +40,7 @@ apiRouter.get('/champions', (req: express.Request, res: express.Response) => {
 
 	let path = "/api/lol/static-data/na/v1.2/champion?";
 	let options = {
-		uri: constants.LOL_API_URL + path + constants.LOL_API_KEY,
+		uri: constants.LOL_API_URL + path + apikey.LOL_API_KEY,
 		json: true
 	};
 
@@ -57,7 +58,7 @@ apiRouter.get('/champion/:id', (req: express.Request, res: express.Response) => 
 
 	let path = "/api/lol/static-data/na/v1.2/champion/" + req.params["id"];
 	let options = {
-		uri: constants.LOL_API_URL + path + '?' + constants.LOL_API_KEY,
+		uri: constants.LOL_API_URL + path + '?' + apikey.LOL_API_KEY,
 		json: true
 	};
 

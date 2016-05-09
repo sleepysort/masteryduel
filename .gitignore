@@ -6,6 +6,8 @@ client/**/*.js.map
 server/**/*.js
 server/**/*.js.map
 
+server/apikey.ts
+
 **/typings/
 scripts/
 *.log

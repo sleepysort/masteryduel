@@ -2,13 +2,14 @@ import request = require('request');
 import constants = require('../constants');
 import Logger = require('../util/logger');
 import I = require('./interfaces');
+import apikey = require('../apikey');
 
 export class ChampionTags {
 	private static tags: {[champId: number]: {primary: I.ChampionTag, secondary: I.ChampionTag} } = {};
 	private static loaded: boolean = false;
 
 	public static loadTags(): void {
-		let reqUrl = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=tags&" + constants.LOL_API_KEY;
+		let reqUrl = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=tags&" + apikey.LOL_API_KEY;
 		let options = {
 			uri: reqUrl,
 			json: true
