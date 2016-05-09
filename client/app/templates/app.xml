@@ -1,13 +1,13 @@
-<img src="/public/img/bg.png" class="background" />
+<img src="/public/img/bg-new.png" class="background" />
 <div hidden>
 	<h1>{{gameState.value}}</h1>
 	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
 	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
 	<button (click)="sendMessage()">Send</button>
 </div>
-<div class="nexus-opponent">
+<div *ngIf="gameState.value===3" class="nexus-opponent">
 	<div *ngIf="enemyNexusHealth.value >= 0" class="nexus-health-bar">
-		<div class="current-health" [style.width]="((enemyNexusHealth.value * 100) / 5) + '%'"></div>
+		<div class="enemy-current-health" [style.width]="((enemyNexusHealth.value * 100) / 5) + '%'"></div>
 		<!-- # of segments should be equal to max health-->
 		<div class="health-segment"></div>
 		<div class="health-segment"></div>
@@ -15,11 +15,22 @@
 		<div class="health-segment"></div>
 		<div class="health-segment"></div>
 	</div>
-	<img src="/public/img/NexusRed.png" class="nexus" />
+	<img src="{{getEnemyIconUrl()}}" class="nexus" />
+	<div class="summonerName">{{getEnemySummonerName()}}</div>
+	<div class="enemy-turn-indicator" [hidden]="isPlayerTurn.value !== -1">
+		<div class="arrow-up"></div>
+		<div class="turn-text">Opponent's turn</div>
+		<div class="move-text">Moves left: {{moveCount.value}}</div>
+	</div>
 </div>
-<div class="nexus-player">
+<div *ngIf="gameState.value===3" class="nexus-player">
+	<div class="player-turn-indicator" [hidden]="isPlayerTurn.value !== 1">
+		<div class="turn-text">Your turn</div>
+		<div class="move-text">Moves left: {{moveCount.value}}</div>
+		<div class="arrow-down"></div>
+	</div>
 	<div *ngIf="playerNexusHealth.value >= 0" class="nexus-health-bar">
-		<div class="current-health" [style.width]="((playerNexusHealth.value * 100) / 5) + '%'"></div>
+		<div class="player-current-health" [style.width]="((playerNexusHealth.value * 100) / 5) + '%'"></div>
 		<!-- # of segments should be equal to max health-->
 		<div class="health-segment"></div>
 		<div class="health-segment"></div>
@@ -27,18 +38,13 @@
 		<div class="health-segment"></div>
 		<div class="health-segment"></div>
 	</div>
-	<img src="/public/img/NexusBlue.png" class="nexus" />
+	<img src="{{getPlayerIconUrl()}}" class="nexus" />
+	<div class="summonerName">{{getPlayerSummonerName()}}</div>
 </div>
 
 <!-- Pick summoner -->
-<div *ngIf="gameState.value==2">
+<div *ngIf="gameState.value===2" style="position: absolute; z-index: 10;">
 	<input type="text" placeholder="Summoner Name" [(ngModel)]="summonerName"/>
 	<button (click)="sendGameSelect()">Load Deck</button>
 </div>
 <md-championpositioner></md-championpositioner>
-
-<div class="message-logger">
-	<div class="message-logger-content">
-	</div>
-	<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onMessageLogger($event)"/>
-</div>

@@ -16,6 +16,10 @@ export class GameService {
 	private champStyles: Dictionary<Style>;
 	private enemyInhibStyles: Style[];
 	private laneStyles: Style[];
+	private playerIconNumber: number;
+	private enemyIconNumber: number;
+	private playerSummonerName: string;
+	private enemySummonerName: string;
 
 	/** Lanes */
 	private topLaneAllies: I.ChampionData[];
@@ -29,7 +33,8 @@ export class GameService {
 	private queuedMove: {uid: string, moveType: string};
 	private enemyNexusHealth: Wrapper<number>;
 	private playerNexusHealth: Wrapper<number>;
-	private currentTurnPlayer: Wrapper<string>;
+	/** 1 for player, -1 for enemy, 0 for neither */
+	private isPlayerTurn: Wrapper<number>;
 	private currentTurnMovesLeft: Wrapper<number>;
 
 	/** Champion that is currently clicked to show controls */
@@ -53,9 +58,13 @@ export class GameService {
 		this.initializeSockets();
 		this.enemyNexusHealth = { value: -1 };
 		this.playerNexusHealth = { value: -1 };
-		this.currentTurnPlayer = { value: null };
+		this.isPlayerTurn = { value: 0 };
 		this.currentTurnMovesLeft = { value: 0 };
 		this.controlChampId = null;
+		this.playerIconNumber = 0;
+		this.enemyIconNumber = 0;
+		this.playerSummonerName = '';
+		this.enemySummonerName = '';
 	}
 
 	private initializeSockets(): void {
@@ -100,9 +109,15 @@ export class GameService {
 
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.playerNexusHealth.value = msg.nexusHealth;
-				this.gameState.value = GameState.Started;
-				this.currentTurnPlayer.value = msg.starter;
+				this.isPlayerTurn.value = msg.starter === this.playerId ? 1 : -1;
 				this.turnNum.value = 1;
+				this.playerIconNumber = msg.playerIcon;
+				this.enemyIconNumber = msg.enemyIcon;
+				this.playerSummonerName = msg.playerSummonerName;
+				this.enemySummonerName = msg.enemySummonerName;
+				this.gameState.value = GameState.Started;
+
+				this.currentTurnMovesLeft.value = 2;
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
@@ -194,8 +209,8 @@ export class GameService {
 		return this.playerNexusHealth;
 	}
 
-	public getCurrentTurnPlayer(): Wrapper<string> {
-		return this.currentTurnPlayer;
+	public getIsPlayerTurn(): Wrapper<number> {
+		return this.isPlayerTurn;
 	}
 
 	public getCurrentTurnMovesLeft(): Wrapper<number> {
@@ -204,6 +219,22 @@ export class GameService {
 
 	public getQueuedMove(): {uid: string, moveType: string} {
 		return this.queuedMove;
+	}
+
+	public getPlayerIconNumber(): number {
+		return this.playerIconNumber;
+	}
+
+	public getEnemyIconNumber(): number {
+		return this.enemyIconNumber;
+	}
+
+	public getPlayerSummonerName(): string {
+		return this.playerSummonerName;
+	}
+
+	public getEnemySummonerName(): string {
+		return this.enemySummonerName;
 	}
 
 	public setControlChamp(uid: string): void {
@@ -316,12 +347,14 @@ export class GameService {
 			this.applyUpdateNexus(update);
 		}
 
-		this.currentTurnPlayer.value = update.turnPlayer;
+		this.isPlayerTurn.value = update.turnPlayer === this.playerId ? 1 : -1 ;
 
 		// Ignore for debug
 		if (update.sourceUid) {
 			this.champDict[update.sourceUid].movedNum = update.movedNum;
 		}
+
+		this.currentTurnMovesLeft.value = update.moveCount;
 
 		this.turnNum.value = update.turnNum;
 	}
@@ -383,6 +416,9 @@ export class GameService {
 					break;
 				case I.Status.DamageReduction:
 					champ.statusEndTurn[I.Status.DamageReduction] = data.turnNum;
+					break;
+				case I.Status.Shielded:
+					champ.statusEndTurn[I.Status.Shielded] = data.turnNum;
 					break;
 			}
 		}
@@ -629,6 +665,7 @@ export class GameService {
 
 	public cancelMove(): void {
 		if (this.queuedMove) {
+			this.clearAllTargets();
 			this.champStyles[this.queuedMove.uid].isSource = false;
 			this.queuedMove = null;
 		}

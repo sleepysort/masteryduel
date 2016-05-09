@@ -61,6 +61,10 @@ export interface DataGameInit {
 	hand: ChampionData[];
 	starter: string;
 	nexusHealth: number;
+	playerIcon: number;
+	enemyIcon: number;
+	playerSummonerName: string;
+	enemySummonerName: string;
 }
 
 export interface DataGameMove {
@@ -136,7 +140,8 @@ export enum Status {
 	Stunned,
 	Invulnerable,
 	Stasis,
-	DamageReduction
+	DamageReduction,
+	Shielded
 }
 
 export enum AbilityType {

@@ -41,4 +41,8 @@ export class LolApiService {
 		}
 		return DATA_DRAGON_URL + this.championCache[champId].key + DATA_DRAGON_IMG_EXTENSION;
 	}
+
+	public getSummonerIconUrl(iconId: number): string {
+		return 'http://ddragon.leagueoflegends.com/cdn/6.9.1/img/profileicon/' + iconId + '.png';
+	}
 }

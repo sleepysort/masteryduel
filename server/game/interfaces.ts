@@ -33,6 +33,10 @@ export interface DataGameInit {
 	hand: g.Champion[];
 	starter: string;
 	nexusHealth: number;
+	playerIcon: number;
+	enemyIcon: number;
+	playerSummonerName: string;
+	enemySummonerName: string;
 }
 
 export interface DataGameMove {
@@ -104,5 +108,6 @@ export enum Status {
 	Stunned,
 	Invulnerable,
 	Stasis,
-	DamageReduction
+	DamageReduction,
+	Shielded
 }
