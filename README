@@ -1,10 +1,1 @@
-This is an empty Angular2/Express/Node.js project.
-
-Fork this repository when starting a new project.
-
-1. Run 'apt-get install nodejs'
-2. Run 'npm install' in the project root to install npm packages
-3. Install tsc and typings will be useful to have installed globally. Do 'npm install -g tsc typings'
-4. run 'typings install' in the client and server directories
-5. Use 'tsc -p [ client | server ]' to build the client and server, respectively
-6. Use 'npm start' to run the server
+Mastery Duel is an entry for the Riot Games API Challenge 2016.
