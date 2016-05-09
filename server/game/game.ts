@@ -1274,11 +1274,11 @@ class Aatrox extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		this.currentTurn++;
-		this.movedNum = turnNum;
 		if (this.currentTurn === 3) {
 			this.health = Math.min(this.maxHealth, Math.round(this.maxHealth * 0.1) + this.health);
 			this.currentTurn = 0;
 		}
+		this.movedNum = turnNum;
 		return enemy.takeDamage(this.dmg, this, turnNum);
 	}
 }
@@ -2652,12 +2652,12 @@ class Jhin extends Champion {
 
 	public attackEnemy(enemy: Champion, turnNum: number): boolean {
 		this.currentTurn++;
-		this.movedNum = turnNum;
 		let dmg = this.dmg;
 		if (this.currentTurn === 4) {
 			dmg += Math.round(2 * this.dmg);
 			this.currentTurn = 0;
 		}
+		this.movedNum = turnNum;
 		return enemy.takeDamage(dmg, this, turnNum);
 	}
 }
@@ -2865,6 +2865,72 @@ class Katarina extends Champion {
 	}
 }
 championById[55] = Katarina;
+
+
+class Kayle extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Intervention',
+			description: 'Cast invulnerability shield on self or ally for 1 turn',
+			type: AbilityType.SingleAllySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let target = game.getChamp(data.targetUid);
+				target.setInvulnTurn(game.getTurnNum() + 1);
+				update.affected.push({uid: target.getUid(), status: I.Status.Invulnerable, turnNum: invulnTurn);
+				return 5;
+			}
+		};
+	}
+}
+championById[10] = Kayle;
+
+
+class Kennen extends Champion {
+	private currentTurn: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.currentTurn = 0;
+		this.ability = {
+			name: 'Mark of the Storm',
+			description: 'Every fourth attack stuns the target.',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+	}
+
+	public attackEnemy(enemy: Champion, turnNum: number): boolean {
+		this.currentTurn++;
+		if (this.currentTurn === 4) {
+			enemy.setStunnedTurn(turnNum + 1);
+			update.affected.push({uid: enemy.getUid(), status: I.Status.Stunned, turnNum: turnNum + 1);
+				currentTurn = 0;
+		}
+		this.movedNum = turnNum;
+		return enemy.takeDamage(this.dmg, this, turnNum);
+	}
+}
+championById[85] = Kennen;
+
+
+
+class KhaZix extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Taste Their Fear',
+			description: 'Deals 150% ' + Math.round(1.5 * this.dmg) + ' to isolated targets.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: null
+		}
+	};
+}
+championById[121] = KhaZix;
 
 
 class Thresh extends Champion {
