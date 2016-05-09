@@ -799,6 +799,11 @@ export class GameService {
 					inhib.isActive = false;
 				}
 				break;
+			case "ability":
+				for (let i = 0; i < this.activeChamps.length; i++) {
+					this.champStyles[this.activeChamps[i].uid].isActive = false;
+				}
+				break;
 		}
 	}
 }

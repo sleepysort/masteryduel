@@ -95,6 +95,10 @@ export interface DataGameMove {
 	};
 }
 
+export interface DataGamePass {
+	playerId: string;
+}
+
 export interface DataGameUpdate {
 	sourceUid: string;
 	nexus?: {[playerId: string]: number};

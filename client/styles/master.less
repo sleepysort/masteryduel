@@ -284,8 +284,16 @@ md-champion {
     &:hover+&+&+&+& .champion:not(.selected) { z-index: 2; }
 }
 
-.champion.active {
-    cursor: url('/public/img/CursorAttack.cur'), pointer;
+.lane-enemy {
+    .champion.active {
+        cursor: url('/public/img/CursorAttack.cur'), pointer;
+    }
+}
+
+.lane-ally {
+    .champion.active {
+        cursor: url('/public/img/CursorPointer.cur'), pointer;
+    }
 }
 
 .champion.source {
@@ -505,4 +513,18 @@ md-champion {
     text-align: center;
     font-size: 100px;
     font-weight: bold;
+}
+
+.champ-statuses {
+    position: absolute;
+    left: 0;
+    top: -28px;
+    height: 24px;
+    width: 100%;
+
+    .status {
+        height: 24px;
+        width: 24px;
+        float: left;
+    }
 }
