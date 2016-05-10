@@ -71,6 +71,10 @@ export interface DataGamePass {
 	playerId: string;
 }
 
+export interface DataGameOver {
+	victor: string;
+}
+
 export interface DataGameUpdate {
 	sourceUid: string;
 	nexus?: {[playerId: string]: number};

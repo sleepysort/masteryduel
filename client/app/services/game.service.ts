@@ -46,6 +46,9 @@ export class GameService {
 	/** The interval id of the timer */
 	private timerInterval: number;
 
+	/** The id of the winner */
+	private victorId: Wrapper<string>;
+
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
 		this.turnNum = { value: 0 };
@@ -72,6 +75,7 @@ export class GameService {
 		this.playerSummonerName = '';
 		this.enemySummonerName = '';
 		this.timeleft = { value: 0 };
+		this.victorId = { value: null };
 	}
 
 	private initializeSockets(): void {
@@ -86,11 +90,11 @@ export class GameService {
 
 			this.playerId = res.playerId;
 
-			this.sock.on('gameprep', (msg: I.DataGamePrep) => {
+			this.sock.once('gameprep', (msg: I.DataGamePrep) => {
 				this.gameState.value = GameState.NotStarted;
 			});
 
-			this.sock.on('gameselect-ack', (msg: I.DataGameSelectAck) => {
+			this.sock.once('gameselect-ack', (msg: I.DataGameSelectAck) => {
 				if (msg.success) {
 					MessageLogger.systemMessage('Deck successfully loaded.');
 				} else {
@@ -138,6 +142,22 @@ export class GameService {
 				clearInterval(this.timerInterval);
 				this.timerInterval = setInterval(this.intervalHandler, 1000);
 			});
+
+			this.sock.on('gameover', (msg: I.DataGameOver) => {
+				console.log(msg);
+				clearTimeout(this.timerInterval);
+
+				if (msg.victor === null) {
+					MessageLogger.systemMessage('Your opponent has disconnected.');
+				} else if (msg.victor === this.playerId){
+					MessageLogger.systemMessage('You are victorious!');
+				} else {
+					MessageLogger.systemMessage('You have been defeated!');
+				}
+
+				this.gameState.value = GameState.Over;
+				this.sock.disconnect();
+			})
 
 			this.sock.on('gameerror', (msg: I.DataGameError) => {
 				MessageLogger.systemMessage('Server sent an error: ' + msg.reason);
@@ -259,6 +279,10 @@ export class GameService {
 
 	public getTimeLeft(): Wrapper<number> {
 		return this.timeleft;
+	}
+
+	public getVictorId(): Wrapper<string> {
+		return this.victorId;
 	}
 
 	public setControlChamp(uid: string): void {
