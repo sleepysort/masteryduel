@@ -107,7 +107,7 @@ export class GameService {
 				if (msg.success) {
 					MessageLogger.systemMessage('Deck successfully loaded.');
 					this.hasNewMessage.value = true;
-					this.loadingMsg.value = 'Summoner found! Please wait for the opponent to select a champion.';
+					this.loadingMsg.value = 'Summoner found! Please wait for the opponent to select a summoner.';
 				} else {
 					MessageLogger.systemMessage('Failed to load the deck.');
 					this.hasNewMessage.value = true;
