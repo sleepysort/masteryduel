@@ -1601,7 +1601,7 @@ class Azir extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Emperor\'s Order',
-			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 25% (' + Math.round(.25 * this.dmg) + ') bonus damage for every ally in the lane to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 25% (' + Math.round(.25 * this.dmg) + ') bonus damage for every ally in the lane to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -1630,22 +1630,21 @@ championById[268] = Azir;
 //-----------------------------------------------------------   B   ------------------------------------------------------------------//
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 class Bard extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Tempered Fate',
-			description: 'All allies in the lane including Bard enter stasis and become untargetable',
-			type: AbilityType.AOEAlly,
+			description: 'Enemies in the targeted lane enter stasis and become untargetable',
+			type: AbilityType.AOEEnemyAnyLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
-				let allies = game.getSameLaneAllyChamps(data.targetUid);
+				let enemies = game.getSameLaneAllyChamps(data.targetUid);
 
-				for (let ally of allies) {
-					ally.setStasisTurn(game.getTurnNum() + 1);
-					update.affected.push({ uid: ally.getUid(), status: I.Status.Stasis, turnNum: ally.getStasisTurn() });
+				for (let enemy of enemies) {
+					enemy.setStasisTurn(game.getTurnNum() + 1);
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Stasis, turnNum: enemy.getStasisTurn() });
 				}
 
 				champ.movedNum = game.getTurnNum();
@@ -1695,7 +1694,7 @@ class Brand extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Pyroclasm',
-			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 25% (' + Math.round(.25 * this.dmg) + ') bonus damage for every enemy in the lane to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.1 * this.dmg) + ' damage plus 25% (' + Math.round(.25 * this.dmg) + ') bonus damage for every enemy in the lane to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -1846,7 +1845,7 @@ class Corki extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Missile Barrage',
-			description: 'Deals ' + Math.round(0.75 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(0.75 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -1911,7 +1910,7 @@ class Diana extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Crescent Strike',
-			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2067,7 +2066,7 @@ class Evelynn extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Agony\'s Embrace',
-			description: 'Deals ' + Math.round(.75 * this.dmg) + ' to enemies in the lane and grants Evelynn a shield equal to 10% of max health (' + Math.round(.1 * this.maxHealth) + ') for every enemy in the lane for 1 turn',
+			description: 'Deals ' + Math.round(.75 * this.dmg) + ' to all enemies in the lane and grants Evelynn a shield equal to 10% of max health (' + Math.round(.1 * this.maxHealth) + ') for every enemy in the lane for 1 turn',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2104,7 +2103,7 @@ class Ezreal extends Champion {
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
-				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+				let enemies = game.getSameLaneAllyChamps(data.targetUid);
 
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(game, Math.round(0.8 * champ.getDamage()), champ, game.getTurnNum(), update)) {
@@ -2112,9 +2111,7 @@ class Ezreal extends Champion {
 					} else {
 						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 					}
-
 				}
-
 				champ.movedNum = game.getTurnNum();
 				return 7;
 			}
@@ -2267,7 +2264,7 @@ class Gangplank extends Champion {
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
-				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+				let enemies = game.getSameLaneAllyChamps(data.targetUid);
 
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(game, (Math.round((Math.random() * 0.26) + 0.75) * champ.getDamage()), champ, game.getTurnNum(), update)) {
@@ -2362,7 +2359,7 @@ class Gragas extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Explosive Cask',
-			description: 'Deals ' + Math.round(0.4 * this.dmg) + ' damage to enemies in the lane and blasts one of the enemies to an adjacent lane.',
+			description: 'Deals ' + Math.round(0.4 * this.dmg) + ' damage to all enemies in the lane and blasts one of the enemies to an adjacent lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2413,7 +2410,7 @@ class Graves extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Buckshot',
-			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2477,7 +2474,7 @@ class Heimerdinger extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Hextech Rockets',
-			description: 'Deals ' + Math.round(0.95 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(0.95 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2513,7 +2510,7 @@ class Illaoi extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Tentacle Smash',
-			description: 'Deals ' + Math.round(0.95 * this.dmg) + ' to enemies in the lane and heals Illaoi equal to 10% of max health (' + Math.round(.08 * this.maxHealth) + ') for every enemy in the lane.',
+			description: 'Deals ' + Math.round(0.95 * this.dmg) + ' to all enemies in the lane and heals Illaoi equal to 10% of max health (' + Math.round(.08 * this.maxHealth) + ') for every enemy in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2654,7 +2651,7 @@ class Jayce extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Shock Blast',
-			description: 'Deals ' + Math.round(1.5 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.5 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -2718,7 +2715,7 @@ class Jinx extends Champion {
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
-				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+				let enemies = game.getSameLaneAllyChamps(data.targetUid);
 
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(game, Math.round(0.6 * champ.getDamage()) + champ.getDamage() * Math.round(1 - (enemy.getHealth() / enemy.getMaxHealth())), champ, game.getTurnNum(), update)) {
@@ -2795,7 +2792,7 @@ class Karma extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Inner Flame',
-			description: 'Deals ' + Math.round(1.15 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.15 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3144,7 +3141,7 @@ class Lissandra extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Frozen Tomb',
-			description: 'Deals ' + Math.round(1.4 * this.dmg) + ' to enemies in the lane and enters stasis for 1 turn.',
+			description: 'Deals ' + Math.round(1.4 * this.dmg) + ' to all enemies in the lane and enters stasis for 1 turn.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3375,7 +3372,7 @@ class MissFortune extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Bullet Time',
-			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3680,7 +3677,7 @@ class Orianna extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Dissonance',
-			description: 'Deals ' + Math.round(1.3 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.3 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3743,7 +3740,7 @@ class Poppy extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Keeper\'s Verdict',
-			description: 'Deals ' + Math.round(0.4 * this.dmg) + ' damage to enemies in the lane and sends the enemies to an adjacent lane.',
+			description: 'Deals ' + Math.round(0.4 * this.dmg) + ' damage to all enemies in the lane and sends the enemies to an adjacent lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3949,7 +3946,7 @@ class Riven extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Windslash',
-			description: 'Deals ' + Math.round(0.7 * this.dmg) + ' damage plus 1% bonus damage for every missing health to enemies in the lane',
+			description: 'Deals ' + Math.round(0.7 * this.dmg) + ' damage plus 1% bonus damage for every missing health to all enemies in the lane',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -4179,7 +4176,7 @@ class Singed extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Poison Trail',
-			description: 'Singed deals AoE damage on attacks to enemies in the lane',
+			description: 'Singed deals AoE damage on attacks to all enemies in the lane',
 			type: AbilityType.Passive,
 			readyTurn: 0,
 			effect: null
@@ -4246,7 +4243,7 @@ class Sivir extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Boomerang Blade',
-			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -4350,7 +4347,7 @@ class Swain extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Ravenous Flock',
-			description: 'Deals ' + Math.round(.75 * this.dmg) + ' to enemies in the lane and heals Swain for 50% of the total damage dealt.',
+			description: 'Deals ' + Math.round(.75 * this.dmg) + ' to all enemies in the lane and heals Swain for 50% of the total damage dealt.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -4446,7 +4443,7 @@ class Talon extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Rake',
-			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(0.85 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -4936,7 +4933,7 @@ class Viktor extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Crescent Strike',
-			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -5195,7 +5192,7 @@ class Zac extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Unstable Matter',
-			description: 'Deals damage equal to 15% of max health (' + Math.round(0.15 * this.maxHealth) + ') to enemies in the lane at the cost of 7% of max health (' + Math.round(0.07 * this.maxHealth) + ').',
+			description: 'Deals damage equal to 15% of max health (' + Math.round(0.15 * this.maxHealth) + ') to all enemies in the lane at the cost of 7% of max health (' + Math.round(0.07 * this.maxHealth) + ').',
 			type: AbilityType.SingleEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -5273,7 +5270,7 @@ class Ziggs extends Champion {
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
-				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+				let enemies = game.getSameLaneAllyChamps(data.targetUid);
 
 				for (let enemy of enemies) {
 					if (enemy.takeDamage(game, Math.round(1.4 * champ.getDamage()), champ, game.getTurnNum(), update)) {
@@ -5299,7 +5296,7 @@ class Zyra extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Deadly Spines',
-			description: 'Deals ' + Math.round(1.33 * this.dmg) + ' damage to enemies in the lane.',
+			description: 'Deals ' + Math.round(1.33 * this.dmg) + ' damage to all enemies in the lane.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
