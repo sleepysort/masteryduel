@@ -1,6 +1,6 @@
 # Mastery Duel #
 
-*   Play at **masteryduel.com***
+   Play at **masteryduel.com**
 
 Mastery Duel is an entry for the Riot Games API Challenge 2016 made by SleepyBox and Bouhm. It is a multiplayer web game in which two players face-off with their decks of choice, representing the Champion masteries of the respective Summoners, in a turn-based strategy card game.
 
