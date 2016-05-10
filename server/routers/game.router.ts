@@ -12,6 +12,16 @@ gameRouter.get('/new', (req: express.Request, res: express.Response) => {
 	res.redirect("/game/" + gameId);
 });
 
+gameRouter.get('/quick', (req: express.Request, res: express.Response) => {
+	let gameId = gamesManager.findOpenGame();
+	if (gameId !== null) {
+		res.redirect("/game/" + gameId);
+	} else {
+		res.redirect("/game/new");
+	}
+
+});
+
 // Mounting the path with the angular code
 gameRouter.use('/app', express.static(path.resolve(constants.CLIENT_ROOT, 'app')));
 

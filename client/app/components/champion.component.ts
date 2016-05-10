@@ -74,7 +74,6 @@ export class ChampionComponent implements OnInit {
 	}
 
 	public onChampionClick(event: Event): void {
-		console.log(this.champData.statusEndTurn);
 		if (this.game.getQueuedMove() && this.styles.isActive) {
 			this.game.registerChampionClick(this.champData.uid);
 		} else if (this.game.getQueuedMove && this.styles.isSource) {

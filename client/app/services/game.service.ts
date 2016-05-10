@@ -126,7 +126,6 @@ export class GameService {
 			});
 
 			this.sock.on('gameinit', (msg: I.DataGameInit) => {
-				console.log(msg);
 				for (let i = 0; i < msg.hand.length; i++) {
 					this.addChampion(msg.hand[i]);
 				}
@@ -151,7 +150,6 @@ export class GameService {
 			});
 
 			this.sock.on('gameupdate', (msg: I.DataGameUpdate) => {
-				console.log(msg);
 				this.applyUpdate(msg);
 
 				this.timeleft.value = 75;
@@ -160,7 +158,6 @@ export class GameService {
 			});
 
 			this.sock.on('gameover', (msg: I.DataGameOver) => {
-				console.log(msg);
 				clearTimeout(this.timerInterval);
 
 				if (msg.victor === null) {
@@ -772,7 +769,6 @@ export class GameService {
 
 	public registerLaneClick(lane: string): void {
 		if (!this.queuedMove) {
-			console.log("No one is moving");
 			return;
 		}
 		if (this.queuedMove.moveType !== "move") {

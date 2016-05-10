@@ -54,6 +54,16 @@ export class GamesManager {
 		return this.games[gameId];
 	}
 
+	public findOpenGame(): string {
+		for (let key in this.games) {
+			if (this.games[key].getPlayerCount() === 1
+					&& this.games[key].isWaiting()) {
+				return key;
+			}
+		}
+		return null;
+	}
+
 	/**
 	* Creates a new game and adds it to the game manager
 	* @return the id of the game
