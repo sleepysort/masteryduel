@@ -1,6 +1,6 @@
 import {Injectable} from 'angular2/core';
 import {ChampionDto, Dictionary} from '../interfaces/interfaces';
-import {SERVER_HOSTNAME} from './hostname.ts';
+import {SERVER_HOSTNAME} from './hostname';
 
 const DATA_DRAGON_URL = "http://ddragon.leagueoflegends.com/cdn/img/champion/loading/";
 const DATA_DRAGON_IMG_EXTENSION = "_0.jpg";
