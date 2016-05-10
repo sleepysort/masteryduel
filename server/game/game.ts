@@ -2275,7 +2275,7 @@ class Galio extends Champion {
 		};
 	}
 }
-championById[105] = Galio;
+championById[3] = Galio;
 
 
 class Gangplank extends Champion {
@@ -4245,7 +4245,7 @@ class Sion extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Unstoppable Onslaught',
+			name: 'Onslaught',
 			description: 'Moves to the target\'s lane and deals ' + Math.round(1.6 * this.dmg) + ' damage and stuns the target.',
 			type: AbilityType.SingleEnemyAnyLane,
 			readyTurn: 0,
