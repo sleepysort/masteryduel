@@ -62,7 +62,7 @@
 		Opponent found!
 	</div>
 	<div class="input-label">
-		Type in a summoner name to use&mdash;doesn't have to be your own!
+		Type in a summoner name to use&mdash;doesn't have to be your own! (Currently NA only)
 	</div>
 	<input class="input-box" type="text" [(ngModel)]="summonerName" (keydown)="onSummonerSubmit($event)"/>
 	<div class="msg" *ngIf="loadingMsg.value!==null">{{loadingMsg.value}}</div>
