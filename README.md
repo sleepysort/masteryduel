@@ -43,7 +43,7 @@ Due to time constraints, we were not able to meet the performance expectations t
 
 ## Things we didn't get to do ##
 
-We barely had any time to play this game ourselves! As a result, we didn't get to look at the balance of each champion relative to each other. The UI is not as polished as we would have hoped, and we didn't get to implement our ideas for animating the champions' moves. Hopefully we will be able to revisit and see those to completion.
+We barely had any time to play this game ourselves! As a result, we didn't get to look at the balance of each champion relative to each other. The UI is not as polished as we would have hoped, and we didn't get to implement our ideas for animating the champions' moves. Other things like DoTs, helpers and traps, and general bug bashing. Hopefully we will be able to revisit and see those to completion.
 
 ## Afterthoughts ##
 
