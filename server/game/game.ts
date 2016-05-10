@@ -4379,6 +4379,7 @@ class Soraka extends Champion {
 		};
 	}
 }
+championById[16] = Soraka;
 
 class Swain extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {

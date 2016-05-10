@@ -1,4 +1,5 @@
 <div class="champion-positioner">
+	<div *ngIf="gameState.value===3" class="pass-button" (click)="onPassButtonClick($event)">Pass</div>
 	<div class="lane-container">
 		<div class="lane-top" [class.active]="topLaneStyles.isActive" (click)="onTopLaneClicked()">
 			<div class="lane-opponent-structs">

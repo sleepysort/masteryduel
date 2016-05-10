@@ -29,8 +29,9 @@ export class ChampionPositionerComponent implements OnInit {
 	public enemyInhibs: Style[];
 	public hand: ChampionData[];
 	public isDrawerOpen: boolean;
-
+	public isPlayerTurn: Wrapper<number>;
 	public hasNewMessage: Wrapper<boolean>;
+	public gameState: Wrapper<GameState>;
 
 	constructor(private game: GameService, private lolapi: LolApiService) {
 	}
@@ -48,6 +49,8 @@ export class ChampionPositionerComponent implements OnInit {
 		this.botLaneStyles = this.game.getLaneStyles(2);
 		this.enemyInhibs = this.game.getEnemyInhibStyles();
 		this.hasNewMessage = this.game.getHasNewMessage();
+		this.isPlayerTurn = this.game.getIsPlayerTurn();
+		this.gameState = this.game.getGameState();
 
 		this.isDrawerOpen = false;
 	}
@@ -112,6 +115,12 @@ export class ChampionPositionerComponent implements OnInit {
 				});
 			}
 			$('.message-logger-input').val('');
+		}
+	}
+
+	public onPassButtonClick(event: Event) {
+		if (this.isPlayerTurn.value === 1) {
+			this.game.send('gamepass', {playerId: this.game.getPlayerId()});
 		}
 	}
 }
