@@ -13,6 +13,9 @@ export class GamesManager {
 	/** Dictionary of games managed by the game manager */
 	private games: { [gameId: string]: g.Game };
 
+	/** Interval to clean up empty games */
+	private cleanup: NodeJS.Timer;
+
 	/**
 	* @return the instance of the game manager being used by the server
 	*/
@@ -28,6 +31,13 @@ export class GamesManager {
 		this.games = {};
 		Logger.log(Logger.Tag.System, "Loading champion tags.");
 		CT.ChampionTags.loadTags();
+		this.cleanup = setInterval(() => {
+			for (let key in this.games) {
+				if (this.games[key].getPlayerCount() === 0) {
+					this.removeGame(key);
+				}
+			}
+		}, 5 * 60 * 1000);
 	}
 
 	/**

@@ -93,12 +93,19 @@ export class Game {
 
 		sock.on('disconnect', () => {
 			Logger.log(Logger.Tag.Network, 'Player ' + newPlayerId + ' disconnected from game ' + this.gameId + '.');
-			this.players.splice(this.players.indexOf(newPlayer), 1);
-			this.gameState = GameState.Over;
-			this.emitAll('gameover', { reason: 'Player disconnected' });
-			if (this.isGameEmpty()) {
-				gm.GamesManager.getInstance().removeGame(this.gameId);
+
+			if (this.gameState === GameState.Over) {
+				console.log('wah');
+				return;
 			}
+
+			// Game was never started
+			let winner;
+			if (this.gameState === GameState.Started) {
+				winner = this.getOpponent(newPlayer.getId());
+			}
+			this.onGameOver(winner);
+
 			return;
 		});
 
@@ -209,7 +216,7 @@ export class Game {
 			sourceUid: null,
 			moveCount: this.movesCount,
 			turnNum: this.turnNum,
-			turnPlayer: this.getCurrentTurnPlayerId()
+			turnPlayer: this.players.length === 2 ? this.getCurrentTurnPlayerId() : null
 		};
 
 		this.emitAll('gameupdate', update);
@@ -446,7 +453,18 @@ export class Game {
 	* Handles the transition from the Started stage to the Over stage
 	*/
 	private onGameOver(player: Player): void {
-		console.log('game over: winner is ' + player.getId());
+		clearInterval(this.turnTimer);
+		if (player) {
+			this.emitAll('gameover', {victor: player.getId()});
+			this.gameState = GameState.Over;
+			Logger.log(Logger.Tag.Game, 'Game ended with ' + player.getId() + ' as the victor.', this.gameId);
+		} else {
+			this.emitAll('gameover', {victor: null});
+		}
+		this.offAll('gamechat');
+		this.offAll('gameselect');
+		this.offAll('gamepass');
+		gm.GamesManager.getInstance().removeGame(this.gameId);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -491,7 +509,11 @@ export class Game {
 
 		try {
 			if (move.attackNexus) {
-				this.tryAttackNexus(player, move.attackNexus, update);
+				// True if the attacked player was defeated
+				if (this.tryAttackNexus(player, move.attackNexus, update)) {
+					this.onGameOver(player);
+					return;
+				}
 			} else if (move.attackChamp) {
 				this.tryAttackChamp(player, move.attackChamp, update);
 			} else if (move.ability) {
@@ -556,7 +578,7 @@ export class Game {
 		}
 	}
 
-	private tryAttackNexus(player: Player, data: any, update: I.DataGameUpdate): void {
+	private tryAttackNexus(player: Player, data: any, update: I.DataGameUpdate): boolean {
 		let source = this.activeChamps[data.uid];
 		update.sourceUid = source.getUid();
 
@@ -586,16 +608,15 @@ export class Game {
 			throw new Error('Opponent nexus is invulnerable');
 		}
 
-		// If opponent health is zero, end the game
-		if (opp.applyDamage(source.getDamage())) {
-			this.onGameOver(player);
-		}
+		opp.applyDamage(source.getDamage());
 
 		source.movedNum = this.turnNum;
 		update.movedNum = source.movedNum;
 
 		// Add data to update object
 		update.nexus[opp.getId()] = opp.getHealth();
+
+		return opp.getHealth() === 0;
 	}
 
 	private tryAttackChamp(player: Player, data: any, update: I.DataGameUpdate): void {
