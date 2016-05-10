@@ -4671,7 +4671,7 @@ class TwistedFate extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Unstoppable Onslaught',
+			name: 'Gate',
 			description: 'Moves to the target\'s lane and deals ' + Math.round(1.4 * this.dmg) + ' damage and stuns the target.',
 			type: AbilityType.SingleEnemyAnyLane,
 			readyTurn: 0,
