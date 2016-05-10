@@ -5,7 +5,7 @@ import apikey = require('../apikey');
 
 export function getSummonerId(name: string): Promise.IThenable<{summonerId: number, icon: number}> {
 	return new Promise((resolve, reject) => {
-		name = name.replace(/ /g, '');
+		name = name.replace(/ /g, '').toLowerCase();
 		let reqUrl = constants.LOL_API_URL + '/api/lol/na/v1.4/summoner/by-name/' + name + '?' + apikey.LOL_API_KEY;
 		let options = {
 			uri: reqUrl,

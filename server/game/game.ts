@@ -2638,6 +2638,7 @@ class JarvanIV extends Champion {
 		return enemy.takeDamage(game, dmg, this, turnNum, update);
 	}
 }
+championById[59] = JarvanIV;
 
 
 class Jax extends Champion {
@@ -4888,7 +4889,7 @@ class Veigar extends Champion {
 		super(owner, champId, champLevel);
 		this.dmgInc = 2;
 		this.ability = {
-			name: 'Phenomental Evil Power',
+			name: 'Phenomenal Evil',
 			description: 'Permanently gains ' + this.dmgInc + ' damage every attack',
 			type: AbilityType.Passive,
 			readyTurn: 0,
