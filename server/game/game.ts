@@ -541,6 +541,12 @@ export class Game {
 		// Was a valid move, unset the timer
 		clearInterval(this.turnTimer);
 
+		for (let i in update.killed) {
+			let death = this.getChamp(update.killed[i].uid);
+			this.getPlayer(death.getOwner()).sendToFountain(death);
+			delete this.activeChamps[update.killed[i].uid];
+		}
+
 		// Lol. If you look at this and not laugh, something is wrong with you.
 		let opUpdate = JSON.parse(JSON.stringify(update));
 		if (wasFromHand) {
