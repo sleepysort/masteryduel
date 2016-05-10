@@ -1530,7 +1530,7 @@ class Annie extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Bearhug',
+			name: 'Bear Hug',
 			description: 'Deals ' + Math.round(0.8 * this.dmg) + ' damage and stuns enemies in the lane for 1 turn.',
 			type: AbilityType.AOEEnemySameLane,
 			readyTurn: 0,
@@ -1862,7 +1862,6 @@ championById[31] = ChoGath;
 
 
 class Corki extends Champion {
-	private currentTurn: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
@@ -1888,7 +1887,6 @@ class Corki extends Champion {
 				return 3;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[42] = Corki;
@@ -1930,8 +1928,6 @@ championById[122] = Darius;
 
 
 class Diana extends Champion {
-	private currentTurn: number;
-
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
@@ -1956,7 +1952,6 @@ class Diana extends Champion {
 				return 4;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[131] = Diana;
@@ -2384,8 +2379,6 @@ championById[150] = Gnar;
 
 
 class Gragas extends Champion {
-	private currentTurn: number;
-
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
@@ -2430,14 +2423,12 @@ class Gragas extends Champion {
 				return 6;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[79] = Gragas;
 
 
 class Graves extends Champion {
-	private currentTurn: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
@@ -2503,8 +2494,6 @@ championById[120] = Hecarim;
 
 
 class Heimerdinger extends Champion {
-	private currentTurn: number;
-
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
@@ -2529,7 +2518,6 @@ class Heimerdinger extends Champion {
 				return 4;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[74] = Heimerdinger;
@@ -2682,7 +2670,6 @@ championById[24] = Jax;
 
 
 class Jayce extends Champion {
-	private currentTurn: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
@@ -2707,7 +2694,6 @@ class Jayce extends Champion {
 				return 5;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[126] = Jayce;
@@ -2825,7 +2811,6 @@ championById[429] = Kalista;
 
 
 class Karma extends Champion {
-	private currentTurn: number;
 
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
@@ -2851,7 +2836,6 @@ class Karma extends Champion {
 				return 3;
 			}
 		};
-		this.currentTurn = 0;
 	}
 }
 championById[43] = Karma;
@@ -2861,7 +2845,7 @@ class Karthus extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Requiem',
+			name: '\'R\'',
 			description: 'Deals ' + Math.round(1.15 * this.dmg) + ' damage to all enemies',
 			type: AbilityType.GlobalEnemy,
 			readyTurn: 0,
@@ -4419,15 +4403,15 @@ class Syndra extends Champion {
 			super(owner, champId, champLevel);
 			this.numAttacks = 0;
 			this.ability = {
-			name: 'Unleashed',
-			description: 'Deals ' + Math.round(1.2 * this.dmg) + 'damage plus 20% (' + Math.round(0.15 * this.dmg) + ') bonus damage for every Dark Sphere (up to 5). Every attack produces a Dark Sphere and is consumed with the usage of this ability.',
+			name: 'Unleashed Power',
+			description: 'Deals ' + Math.round(1.2 * this.dmg) + 'damage plus 20% (' + Math.round(0.2 * this.dmg) + ') bonus damage for every Dark Sphere (up to 5). Every attack produces a Dark Sphere and is consumed with the usage of this ability.',
 			type: AbilityType.SingleEnemyAnyLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
 				let champ = game.getChamp(data.sourceUid);
 				let enemy = game.getChamp(data.targetUid);
 
-				if (enemy.takeDamage(game, Math.round(1.2 * champ.getDamage()) + Math.round(Math.pow(1.15, this.numAttacks)), champ, game.getTurnNum(), update)) {
+				if (enemy.takeDamage(game, Math.round(1.2 * champ.getDamage()) + Math.round(Math.pow(1.2, this.numAttacks)), champ, game.getTurnNum(), update)) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
 					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
@@ -4572,7 +4556,7 @@ class Thresh extends Champion {
 		};
 	}
 }
-championById[16] = Thresh;
+championById[412] = Thresh;
 
 class Tristana extends Champion {
 
@@ -4702,3 +4686,661 @@ class TwistedFate extends Champion {
 	}
 }
 championById[4] = TwistedFate;
+
+
+class Twitch extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Spray and Pray',
+			description: 'Twitch\'s attacks deal AoE damage for 3 turns.',
+			type: AbilityType.Self,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				champ.setDamageBuff(game.getTurnNum() + 1, 0, 4);
+				update.affected.push({uid: champ.getUid(), status: I.Status.DamageBuff, turnNum: game.getTurnNum() + 1});
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		this.movedNum = turnNum;
+		if (turnNum <= this.statusEndTurn[I.Status.DamageBuff]) {
+			let enemies = game.getSameLaneAllyChamps(enemy.getUid());
+			for (let enemy2 of enemies) {
+				if (enemy2.getUid() !== enemy.getUid()) {
+					if (enemy2.takeDamage(game, this.dmg, this, turnNum, update)) {
+						update.killed.push({ uid: enemy2.getUid(), killer: this.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy2.getUid(), health: enemy2.getHealth(), attacker: this.getUid() });
+					}
+				}
+			}
+		}
+		return enemy.takeDamage(game, this.dmg, this, turnNum, update);
+	}
+}
+championById[29] = Twitch;
+
+
+class Udyr extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Unstoppable Onslaught',
+			description: 'Deals ' + Math.round(1.6 * this.dmg) + ' damage and stuns the target.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(1.6 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					enemy.setStunnedTurn(game.getTurnNum() + 1);
+					update.affected.push({uid: enemy.getUid(), status: I.Status.Stunned, turnNum: enemy.getStunnedTurn()});
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+				champ.movedNum = game.getTurnNum();
+
+				return 4;
+			}
+		};
+	}
+}
+championById[77] = Udyr;
+
+
+class Urgot extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Position Reverser',
+			description: 'Swaps places with target enemy and stuns the target.',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+				let champLoc = champ.getLocation();
+				let enemyLoc = enemy.getLocation();
+
+				enemy.setLocation(champLoc, game.getTurnNum());
+				champ.setLocation(enemyLoc, game.getTurnNum());
+				update.moved.push({
+					uid: enemy.getUid(),
+					location: enemy.getLocation()
+				});
+				update.moved.push({
+					uid: champ.getUid(),
+					location: champ.getLocation()
+				});
+				enemy.setStunnedTurn(game.getTurnNum() + 1);
+				update.affected.push({uid: enemy.getUid(), status: I.Status.Stunned, turnNum: enemy.getStunnedTurn()});
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+}
+championById[6] = Urgot;
+
+
+class Varus extends Champion {
+		private numAttacks: number;
+		constructor(owner: string, champId: number, champLevel: number) {
+			super(owner, champId, champLevel);
+			this.numAttacks = 0;
+			this.ability = {
+			name: 'Blight Pierce',
+			description: 'Deals ' + Math.round(0.9 * this.dmg) + 'damage plus 15% (' + Math.round(0.15 * this.dmg) + ') bonus damage for every blight stack (up to 3). Every attack applies blight stacks and are consumed with the usage of this ability.',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(7 * champ.getDamage()) + Math.round(Math.pow(1.15, this.numAttacks)), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+				this.numAttacks = 0;
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		this.numAttacks++;
+		if (this.numAttacks > 3) {
+			this.numAttacks = 3;
+		}
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, this.dmg, this, turnNum, update);
+	}
+}
+championById[110] = Varus;
+
+
+class Vayne extends Champion {
+	private numAttacks: number;
+	private attackedTargetUid: string;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.numAttacks = 0;
+		this.attackedTargetUid = "";
+		this.ability = {
+			name: 'Silver Bolts',
+			description: 'Every third attack on the same target deals bonus damage equal to 15% of the target\'s max health.',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		let dmg = this.dmg;
+		if (this.attackedTargetUid === "") {
+			this.attackedTargetUid = enemy.getUid();
+		}
+		if (enemy.getUid() === this.attackedTargetUid) {
+			if (this.numAttacks < 3) {
+				this.numAttacks++;
+			} else {
+				dmg += Math.round(0.15 * enemy.getMaxHealth());
+			}
+		} else {
+			this.attackedTargetUid = enemy.getUid();
+			this.numAttacks = 0;
+		}
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[67] = Vayne;
+
+
+class Veigar extends Champion {
+	dmgInc: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.dmgInc = 2;
+		this.ability = {
+			name: 'Phenomental Evil Power',
+			description: 'Permanently gains ' + this.dmgInc + ' damage every attack',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		}
+	};
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		let dmg = this.dmg;
+		this.addDamage(this.dmgInc);
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[45] = Veigar;
+
+
+class VelKoz extends Champion {
+	private currentTurn: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Deconstruction',
+			description: 'Every third attack deals 25% bonus damage (' + Math.round(0.25 * this.dmg) + ').',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+		this.currentTurn = 0;
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		this.currentTurn++;
+		this.movedNum = turnNum;
+		let dmg = this.dmg;
+		if (this.currentTurn === 3) {
+			dmg += Math.round(0.25 * this.dmg);
+			this.currentTurn = 0;
+		}
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[161] = VelKoz;
+
+
+class Vi extends Champion {
+	private numAttacks: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.numAttacks = 0;
+		this.ability = {
+			name: 'Blast Shield',
+			description: 'Gains a shield every 3 attacks equal to ' + Math.round(0.1 * this.maxHealth) + ' that lasts 1 turn.',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		this.numAttacks++;
+		let dmg = this.dmg;
+		if (this.numAttacks === 3) {
+			this.setShield(turnNum + 1, Math.round(0.15 * this.maxHealth), 1);
+			update.affected.push({uid: this.getUid(), status: I.Status.Shielded, turnNum: game.getTurnNum() + 1});
+			this.numAttacks = 0;
+		}
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[254] = Vi;
+
+
+class Viktor extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Crescent Strike',
+			description: 'Deals ' + Math.round(1.25 * this.dmg) + ' damage to enemies in the lane.',
+			type: AbilityType.AOEEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(game, Math.round(1.25 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+					}
+
+				}
+
+				champ.movedNum = game.getTurnNum();
+				return 4;
+			}
+		};
+	}
+}
+championById[112] = Viktor;
+
+
+class Vladimir extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Transfusion',
+			description: 'Deals ' + Math.round(1.5 * this.dmg) + ' damage to a target and heals for half the amount).',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(1.5 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					champ.addHealth(Math.min(Math.round(0.75 * champ.getDamage()), champ.getHealth()));
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+
+				champ.movedNum = game.getTurnNum();
+				return 4;
+			}
+		};
+	}
+}
+championById[8] = Vladimir;
+
+
+class Volibear extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Frenzy Bite',
+			description: 'Deals ' + Math.round (1.2 * this.dmg) + ' damage plus bonus damage equal to 20% of current health (' + Math.round(0.2 * this.health) + ' to the target.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(1.2 * this.dmg) + Math.round(champ.getHealth() * 0.2), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+				champ.movedNum = game.getTurnNum();
+
+				return 4;
+			}
+		};
+	}
+}
+championById[106] = Volibear;
+
+
+class Warwick extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Nether Grasp',
+			description: 'Deals ' + Math.round(1.7 * this.dmg) + ' damage to a target and stuns the target for 1 turn.',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(1.7 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					enemy.setStunnedTurn(game.getTurnNum() + 1);
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Stunned, turnNum: enemy.getStunnedTurn() });
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+}
+championById[19] = Warwick;
+
+
+class Wukong extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Crushing Blow',
+			description: 'Deals ' + Math.round (2.1 * this.dmg) + ' damage to the target.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, 2.1 * this.dmg, champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+				champ.movedNum = game.getTurnNum();
+
+				return 4;
+			}
+		};
+	}
+}
+championById[62] = Wukong;
+
+
+class Xerath extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Rite of the Arcane',
+			description: 'Deals ' + Math.round(1.2 * this.dmg) + ' damage to all enemies in any targeted lane',
+			type: AbilityType.AOEEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(game, Math.round(1.2 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+					}
+
+				}
+
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+}
+championById[101] = Xerath;
+
+
+class XinZhao extends Champion {
+	private currentTurn: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.currentTurn = 0;
+		this.ability = {
+			name: 'Blood Thirst',
+			description: 'Every third attack heals for 10% of max HP (' + Math.round(0.1 * this.maxHealth) + ').',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		this.currentTurn++;
+		if (this.currentTurn === 3) {
+			this.health = Math.min(this.maxHealth, Math.round(this.maxHealth * 0.1) + this.health);
+			this.currentTurn = 0;
+		}
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, this.dmg, this, turnNum, update);
+	}
+}
+championById[5] = XinZhao;
+
+
+class Yasuo extends Champion {
+	critChance: number;
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.critChance = 35;
+		this.ability = {
+			name: 'Way of the Wanderer',
+			description: 'Has 35% chance to crit for 150% damage',
+			type: AbilityType.Passive,
+			readyTurn: 0,
+			effect: null
+		}
+	};
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		let dmg = this.dmg;
+		let rng = Math.floor((Math.random()*100) + 1);
+		if (rng <= this.critChance) {
+			dmg = dmg * 1.5;
+		}
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[157] = Yasuo;
+
+
+class Yorick extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Omen of Famine',
+			description: 'Deals ' + Math.round(1.3 * this.dmg) + ' damage to a target and heals for 75% of the amount).',
+			type: AbilityType.SingleEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(1.3 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					champ.addHealth(Math.min(Math.round(0.75 * (1.3 * champ.getDamage())), champ.getHealth()));
+				} else {
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+
+
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+}
+championById[83] = Yorick;
+
+
+class Zac extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Unstable Matter',
+			description: 'Deals damage equal to 15% of max health (' + Math.round(0.15 * this.maxHealth) + ') to enemies in the lane at the cost of 7% of max health (' + Math.round(0.07 * this.maxHealth) + ').',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(game, Math.round(0.15 * this.maxHealth), champ, game.getTurnNum(), update)) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+						if (champ.takeDamage(game, champ.getMaxHealth() * 0.07, champ, game.getTurnNum(), update)) {
+							update.killed.push({ uid: champ.getUid(), killer: champ.getUid() });
+						} else {
+							update.damaged.push({ uid: champ.getUid(), health: champ.getHealth(), attacker: champ.getUid() });
+						}
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+					}
+				}
+
+				champ.movedNum = game.getTurnNum();
+
+				return 2;
+			}
+		};
+	}
+}
+championById[154] = Zac;
+
+
+class Zed extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Death Mark',
+			description: 'Deals ' + Math.round(this.dmg * 0.85) + ' damage and marks the target. When Zed attacks a marked target, the target takes 50% (' + Math.round(this.dmg * 5) + ' additional damage.',
+			type: AbilityType.SingleEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemy = game.getChamp(data.targetUid);
+
+				if (enemy.takeDamage(game, Math.round(0.85 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+				} else {
+					enemy.setMark(game.getTurnNum() + 1, 1);
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Marked, turnNum: game.getTurnNum() + 1 });
+					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+				}
+				return 5;
+			}
+		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		let dmg = this.dmg;
+		if (enemy.isMarked()) {
+			dmg += Math.round(1.5 * dmg);
+			enemy.consumeMark();
+		}
+
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
+	}
+}
+championById[238] = Zed;
+
+
+class Ziggs extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Mega Inferno Bomb',
+			description: 'Deals ' + Math.round(1.4 * this.dmg) + ' damage to all enemies in any targeted lane',
+			type: AbilityType.AOEEnemyAnyLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(game, Math.round(1.4 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+					}
+
+				}
+
+				champ.movedNum = game.getTurnNum();
+				return 6;
+			}
+		};
+	}
+}
+championById[115] = Ziggs;
+
+
+class Zyra extends Champion {
+
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Deadly Spines',
+			description: 'Deals ' + Math.round(1.33 * this.dmg) + ' damage to enemies in the lane.',
+			type: AbilityType.AOEEnemySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let enemies = game.getSameLaneEnemyChamps(data.sourceUid);
+
+				for (let enemy of enemies) {
+					if (enemy.takeDamage(game, Math.round(1.33 * champ.getDamage()), champ, game.getTurnNum(), update)) {
+						update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
+					} else {
+						update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
+					}
+
+				}
+
+				champ.movedNum = game.getTurnNum();
+				return 5;
+			}
+		};
+	}
+
+}
+championById[143] = Zyra;
