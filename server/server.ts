@@ -23,10 +23,6 @@ let gamesManager = GM.GamesManager.getInstance();
 // Path to npm packages
 app.use('/lib', express.static(path.resolve(constants.PROJ_ROOT, 'node_modules')));
 
-// Path to public files
-app.use('/public', express.static(constants.PUBLIC_ROOT))
-
-
 /************************************************
  * Set up routers
  */

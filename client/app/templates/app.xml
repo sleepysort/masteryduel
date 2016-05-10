@@ -1,4 +1,4 @@
-<img src="/public/img/bg-new.png" class="background" />
+<img src="http://cdn.masteryduel.com/img/bg-new.png" class="background" />
 <div *ngIf="gameState.value===3" class="nexus-opponent">
 	<div *ngIf="enemyNexusHealth.value >= 0" class="nexus-health-bar">
 		<div class="enemy-current-health" [style.width]="((enemyNexusHealth.value * 100) / 5) + '%'"></div>
@@ -69,7 +69,7 @@
 </div>
 
 <div class="game-over-overlay" [hidden]="gameState.value!==4">
-	<img *ngIf="isVictor.value" class="victory" src="/public/img/Victory.png" />
-	<img *ngIf="!isVictor.value" class="defeat" src="/public/img/Defeat.png" />
+	<img *ngIf="isVictor.value" class="victory" src="http://cdn.masteryduel.com/img/Victory.png" />
+	<img *ngIf="!isVictor.value" class="defeat" src="http://cdn.masteryduel.com/img/Defeat.png" />
 	<a class="new-game" href="/game/new">New Game</a>
 </div>
