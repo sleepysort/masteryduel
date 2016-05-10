@@ -685,6 +685,12 @@ export class GameService {
 			return false;
 		}
 
+		if (this.champDict[uid].movedNum >= this.turnNum.value) {
+			MessageLogger.systemMessage("This champion has already made a move this turn.");
+			this.hasNewMessage.value = true;
+			return false;
+		}
+
 		if (this.champDict[uid].ability.type === I.AbilityType.SingleEnemySameLane
 				|| this.champDict[uid].ability.type === I.AbilityType.SingleEnemyAnyLane
 				|| this.champDict[uid].ability.type === I.AbilityType.SingleAllySameLane
@@ -700,6 +706,7 @@ export class GameService {
 					sourceUid: uid
 				}
 			}
+			this.champStyles[uid].isControl = false;
 			this.send("gamemove", msg);
 			return false;
 		}

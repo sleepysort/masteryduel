@@ -5353,3 +5353,26 @@ class Zyra extends Champion {
 
 }
 championById[143] = Zyra;
+
+class Zilean extends Champion {
+	constructor(owner: string, champId: number, champLevel: number) {
+		super(owner, champId, champLevel);
+		this.ability = {
+			name: 'Rewind',
+			description: 'Resets the cooldown of a target ally in the lane.',
+			type: AbilityType.SingleAllySameLane,
+			readyTurn: 0,
+			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
+				let champ = game.getChamp(data.sourceUid);
+				let ally = game.getChamp(data.targetUid);
+				ally.getAbility().readyTurn = 0;
+				update.cooldown.push({ uid: ally.getUid(), readyTurn: ally.getAbility().readyTurn });
+
+				champ.movedNum = game.getTurnNum();
+				return 7;
+			}
+		};
+	}
+
+}
+championById[26] = Zilean;

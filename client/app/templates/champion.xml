@@ -27,6 +27,8 @@
             {{champData.ability.name}}
             <div class="ability-tooltip">
                 {{champData.ability.description}}
+                <br/>
+                {{champData.ability.readyTurn - currentTurnNum.value >= 0 ? 'Cooldown: ' + (champData.ability.readyTurn - currentTurnNum.value + 1) : 'Ready!'}}
                 <div class="ability-tooltip-arrow"></div>
             </div>
         </div>
