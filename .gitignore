@@ -3,6 +3,8 @@ node_modules/
 client/**/*.js
 client/**/*.js.map
 
+client/app/services/hostname.ts
+
 server/**/*.js
 server/**/*.js.map
 

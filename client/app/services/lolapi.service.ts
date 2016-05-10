@@ -1,5 +1,6 @@
 import {Injectable} from 'angular2/core';
 import {ChampionDto, Dictionary} from '../interfaces/interfaces';
+import {SERVER_HOSTNAME} from './hostname.ts';
 
 const DATA_DRAGON_URL = "http://ddragon.leagueoflegends.com/cdn/img/champion/loading/";
 const DATA_DRAGON_IMG_EXTENSION = "_0.jpg";
@@ -19,7 +20,7 @@ export class LolApiService {
 
 	public getChampions(): Promise<Dictionary<ChampionDto>> {
 		return new Promise<Dictionary<ChampionDto>>((resolve, reject) => {
-			$.getJSON('http://localhost:8000/lolapi/champions', (res: any) => {
+			$.getJSON(SERVER_HOSTNAME + '/lolapi/champions', (res: any) => {
 				if (!('data' in res)) {
 					reject(res.status.status_code);
 				}
