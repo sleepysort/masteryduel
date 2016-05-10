@@ -2,7 +2,9 @@
 
    Play at **masteryduel.com**
 
-Mastery Duel is an entry for the Riot Games API Challenge 2016 made by SleepyBox and Bouhm. It is a multiplayer web game in which two players face-off with their decks of choice, representing the Champion masteries of the respective Summoners, in a turn-based strategy card game.
+Mastery Duel is an entry for the Riot Games API Challenge 2016 made by SleepyBox and Bouhm. It is a multiplayer web game in which two players face-off with their decks of choice, representing the Champion masteries of the respective Summoners, in a turn-based strategy card game. 
+
+Currently only supports NA summoners, and is really only playable at a resolution above 1366x768.
 
 ## Game Design ##
 
@@ -43,7 +45,7 @@ Due to time constraints, we were not able to meet the performance expectations t
 
 ## Things we didn't get to do ##
 
-We barely had any time to play this game ourselves! As a result, we didn't get to look at the balance of each champion relative to each other. The UI is not as polished as we would have hoped, and we didn't get to implement our ideas for animating the champions' moves. Other things like DoTs, helpers and traps, and general bug bashing. Hopefully we will be able to revisit and see those to completion.
+We barely had any time to play this game ourselves! As a result, we didn't get to look at the balance of each champion relative to each other. The UI is not as polished as we would have hoped, and we didn't get to implement our ideas for animating the champions' moves. Other things like DoTs, helpers and traps, supporting all regions, being playable on all devices, and general bug bashing were also high on our list. Hopefully we will be able to revisit and see those to completion.
 
 ## Afterthoughts ##
 
