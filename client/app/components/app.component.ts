@@ -1,4 +1,4 @@
-import {Component, OnInit} from 'angular2/core';
+import {Component, OnInit, Input} from 'angular2/core';
 import {Dictionary, ChampionDto, GameState, Style, Wrapper} from '../interfaces/interfaces';
 import * as I from '../interfaces/data.interfaces';
 import {LolApiService} from '../services/lolapi.service';
@@ -17,15 +17,21 @@ import {ChampionPositionerComponent} from './championpositioner.component';
 })
 
 export class AppComponent implements OnInit {
+	@Input()
+	public summonerName: string;
+
 	public sockEvent: string;
 	public sockData: string;
-	public summonerName: string;
 	public gameState: Wrapper<GameState>;
 	public playerNexusHealth: Wrapper<number>;
 	public enemyNexusHealth: Wrapper<number>;
 	public isPlayerTurn: Wrapper<number>;
 	public moveCount: Wrapper<number>;
 	public timeleft: Wrapper<number>;
+	public loadingMsg: Wrapper<string>;
+	public gameLink: string;
+	public isVictor: Wrapper<boolean>;
+	public playerId: string;
 
 	constructor(private game: GameService, private lolApi: LolApiService) { }
 
@@ -36,6 +42,10 @@ export class AppComponent implements OnInit {
 		this.isPlayerTurn = this.game.getIsPlayerTurn();
 		this.moveCount = this.game.getCurrentTurnMovesLeft();
 		this.timeleft = this.game.getTimeLeft();
+		this.loadingMsg = this.game.getLoadingMessage();
+		this.gameLink = window.location.href;
+		this.isVictor = this.game.getIsVictor();
+		this.playerId = this.game.getPlayerId();
 	}
 
 	public sendMessage(): void {
@@ -70,5 +80,11 @@ export class AppComponent implements OnInit {
 
 	public getEnemySummonerName(): string {
 		return this.game.getEnemySummonerName();
+	}
+
+	public onSummonerSubmit(event: KeyboardEvent): void {
+		if (event.keyCode === 13) {  // Enter
+			this.sendGameSelect();
+		}
 	}
 }

@@ -1,4 +1,4 @@
-stery//"out":"../../public/css/master.css"
+//"out":"../../public/css/master.css"
 
 body {
     font-family: 'Lora', serif;
@@ -331,6 +331,7 @@ md-champion {
         z-index: 1;
         transform: translateY(100%);
         transition: transform 1s ease;
+        border-top: solid #aaa 5px;
 
         .drawer-toggle-btn {
             text-align: center;
@@ -338,14 +339,20 @@ md-champion {
             width: 60%;
             background-color: darkgray;
             position: absolute;
-            top: -50px;
+            top: -55px;
             left: 50%;
             transform: translateX(-50%);
+            border: solid #fff 5px;
+            border-bottom: none;
 
             img {
                 height: 50px;
                 transform: rotate(180deg);
             }
+        }
+
+        .new-message {
+            animation: glowwhite 1s ease-in-out 0s infinite alternate;
         }
 
         &-opened {
@@ -362,6 +369,12 @@ md-champion {
             width: 100%;
             height: 100%;
         }
+    }
+}
+
+@keyframes glowwhite {
+    to {
+        box-shadow: 0 0 15px 5px #eee;
     }
 }
 
@@ -550,5 +563,109 @@ md-champion {
 
     &:active {
         background-color: #aaa;
+    }
+}
+
+.game-waiting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    text-align: center;
+    padding-top: 20%;
+    color: white;
+
+	.overlay-heading {
+        font-size: 120px;
+        position: relative;
+    }
+
+	.overlay-subtext {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+	.share-label {
+        font-size: 14px;
+    }
+
+    .share-link {
+        height: 1.5em;
+        font-size: 18px;
+        width: 30%;
+        text-align: center;
+        margin: 20px;
+        margin-top: 5px;
+        background-color: rgba(0,0,0,0.9);
+        border: none;
+        color: white;
+    }
+}
+
+.game-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    text-align: center;
+    padding-top: 20%;
+    color: white;
+
+	.overlay-heading {
+        font-size: 120px;
+        position: relative;
+    }
+
+	.overlay-subtext {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+	.input-label {
+        font-size: 14px;
+    }
+
+    .input-box {
+        height: 1.5em;
+        font-size: 18px;
+        width: 30%;
+        text-align: center;
+        margin: 20px;
+        margin-top: 5px;
+        background-color: rgba(0,0,0,0.9);
+        border: none;
+        color: white;
+    }
+
+    .error-msg {
+        font-size: 14px;
+    }
+}
+
+.game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    text-align: center;
+    color: white;
+
+    .victory {
+        height: 90%;
+    }
+
+    .defeat {
+        height: 90%;
+    }
+
+    .new-game {
+        color: white;
+        text-decoration: none;
     }
 }

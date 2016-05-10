@@ -95,7 +95,6 @@ export class Game {
 			Logger.log(Logger.Tag.Network, 'Player ' + newPlayerId + ' disconnected from game ' + this.gameId + '.');
 
 			if (this.gameState === GameState.Over) {
-				console.log('wah');
 				return;
 			}
 
@@ -167,7 +166,7 @@ export class Game {
 								});
 							}
 						}).catch((err) => {
-							player.getSocket().emit('gameerror', {reason: err});
+							player.getSocket().emit('gameselect-ack', { success: false, reason: err });
 						});
 			});
 

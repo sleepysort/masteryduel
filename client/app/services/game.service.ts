@@ -47,7 +47,13 @@ export class GameService {
 	private timerInterval: number;
 
 	/** The id of the winner */
-	private victorId: Wrapper<string>;
+	private isVictor: Wrapper<boolean>;
+
+	/** True when a new message has arrived */
+	private hasNewMessage: Wrapper<boolean>;
+
+	/** Error message for deck loading */
+	private loadingMsg: Wrapper<string>;
 
 	constructor() {
 		this.gameState = { value: GameState.Waiting };
@@ -75,7 +81,9 @@ export class GameService {
 		this.playerSummonerName = '';
 		this.enemySummonerName = '';
 		this.timeleft = { value: 0 };
-		this.victorId = { value: null };
+		this.isVictor = { value: false };
+		this.hasNewMessage = { value: false };
+		this.loadingMsg = { value: null };
 	}
 
 	private initializeSockets(): void {
@@ -84,6 +92,7 @@ export class GameService {
 		this.sock.once('gamejoin-ack', (res: I.DataGameJoinAck) => {
 			if (!res.success) {
 				MessageLogger.systemMessage('Failed to join the game. ' + res.reason);
+				this.hasNewMessage.value = true;
 				this.sock.close();
 				return;
 			}
@@ -94,19 +103,25 @@ export class GameService {
 				this.gameState.value = GameState.NotStarted;
 			});
 
-			this.sock.once('gameselect-ack', (msg: I.DataGameSelectAck) => {
+			this.sock.on('gameselect-ack', (msg: I.DataGameSelectAck) => {
 				if (msg.success) {
 					MessageLogger.systemMessage('Deck successfully loaded.');
+					this.hasNewMessage.value = true;
+					this.loadingMsg.value = 'Summoner found! Please wait for the opponent to select a champion.';
 				} else {
 					MessageLogger.systemMessage('Failed to load the deck.');
+					this.hasNewMessage.value = true;
+					this.loadingMsg.value = msg.reason;
 				}
 			});
 
 			this.sock.on('gamechat', (msg: I.DataGameChat) => {
 				if (msg.playerId === this.playerId) {
 					MessageLogger.playerChatMessage(msg.text);
+					this.hasNewMessage.value = true;
 				} else {
 					MessageLogger.opponentChatMessage(msg.text);
+					this.hasNewMessage.value = true;
 				}
 			});
 
@@ -117,6 +132,7 @@ export class GameService {
 				}
 
 				MessageLogger.systemMessage('The game is starting! GLHF');
+				this.hasNewMessage.value = true;
 
 				this.enemyNexusHealth.value = msg.nexusHealth;
 				this.playerNexusHealth.value = msg.nexusHealth;
@@ -149,10 +165,15 @@ export class GameService {
 
 				if (msg.victor === null) {
 					MessageLogger.systemMessage('Your opponent has disconnected.');
+					this.hasNewMessage.value = true;
 				} else if (msg.victor === this.playerId){
 					MessageLogger.systemMessage('You are victorious!');
+					this.hasNewMessage.value = true;
+					this.isVictor.value = true;
 				} else {
 					MessageLogger.systemMessage('You have been defeated!');
+					this.hasNewMessage.value = true;
+					this.isVictor.value = false;
 				}
 
 				this.gameState.value = GameState.Over;
@@ -161,6 +182,7 @@ export class GameService {
 
 			this.sock.on('gameerror', (msg: I.DataGameError) => {
 				MessageLogger.systemMessage('Server sent an error: ' + msg.reason);
+				this.hasNewMessage.value = true;
 			});
 		});
 
@@ -281,8 +303,16 @@ export class GameService {
 		return this.timeleft;
 	}
 
-	public getVictorId(): Wrapper<string> {
-		return this.victorId;
+	public getIsVictor(): Wrapper<boolean> {
+		return this.isVictor;
+	}
+
+	public getHasNewMessage(): Wrapper<boolean> {
+		return this.hasNewMessage;
+	}
+
+	public getLoadingMessage(): Wrapper<string> {
+		return this.loadingMsg;
 	}
 
 	public setControlChamp(uid: string): void {
@@ -571,21 +601,25 @@ export class GameService {
 	public registerChampionAttack(uid: string): boolean {
 		if (this.queuedMove) {
 			MessageLogger.systemMessage('Another champion is already trying to make a move.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage('This champion is stunned.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage('This champion is in stasis.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion has already made a move this turn.");
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
@@ -598,21 +632,25 @@ export class GameService {
 	public registerChampionMove(uid: string): boolean {
 		if (this.queuedMove) {
 			MessageLogger.systemMessage('Another champion is already trying to make a move.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion is stunned.");
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage('This champion is in stasis.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].movedNum >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion has already made a move this turn.");
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
@@ -625,21 +663,25 @@ export class GameService {
 	public registerChampionAbility(uid: string): boolean {
 		if (this.queuedMove) {
 			MessageLogger.systemMessage('Another champion is already trying to make a move.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].ability.readyTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage('This ability is on cooldown.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stunnedTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage("This champion is stunned.");
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
 		if (this.champDict[uid].stasisTurn >= this.turnNum.value) {
 			MessageLogger.systemMessage('This champion is in stasis.');
+			this.hasNewMessage.value = true;
 			return false;
 		}
 
@@ -666,6 +708,7 @@ export class GameService {
 	public registerChampionClick(uid: string): void {
 		if (!this.queuedMove) {
 			MessageLogger.systemMessage("No one is currently attacking.");
+			this.hasNewMessage.value = true;
 			return;
 		}
 
@@ -699,6 +742,7 @@ export class GameService {
 	public registerNexusClick(location: I.Location): void {
 		if (!this.queuedMove) {
 			MessageLogger.systemMessage("No one is currently attacking.");
+			this.hasNewMessage.value = true;
 			return;
 		}
 

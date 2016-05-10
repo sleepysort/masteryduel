@@ -27,10 +27,10 @@ export class ChampionPositionerComponent implements OnInit {
 	public midLaneStyles: Style;
 	public botLaneStyles: Style;
 	public enemyInhibs: Style[];
-
 	public hand: ChampionData[];
-
 	public isDrawerOpen: boolean;
+
+	public hasNewMessage: Wrapper<boolean>;
 
 	constructor(private game: GameService, private lolapi: LolApiService) {
 	}
@@ -47,8 +47,9 @@ export class ChampionPositionerComponent implements OnInit {
 		this.midLaneStyles = this.game.getLaneStyles(1);
 		this.botLaneStyles = this.game.getLaneStyles(2);
 		this.enemyInhibs = this.game.getEnemyInhibStyles();
+		this.hasNewMessage = this.game.getHasNewMessage();
 
-		this.isDrawerOpen = true;
+		this.isDrawerOpen = false;
 	}
 
 	public onTopLaneClicked() {
@@ -71,6 +72,7 @@ export class ChampionPositionerComponent implements OnInit {
 
 	public onDrawerButtonClicked(event: Event) {
 		this.isDrawerOpen = !this.isDrawerOpen;
+		this.hasNewMessage.value = false;
 		event.stopPropagation();
 	}
 

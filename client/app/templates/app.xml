@@ -1,10 +1,4 @@
 <img src="/public/img/bg-new.png" class="background" />
-<div hidden>
-	<h1>{{gameState.value}}</h1>
-	<input type="text" placeholder="Event" [(ngModel)]="sockEvent"/>
-	<input type="text" placeholder="Data" [(ngModel)]="sockData"/>
-	<button (click)="sendMessage()">Send</button>
-</div>
 <div *ngIf="gameState.value===3" class="nexus-opponent">
 	<div *ngIf="enemyNexusHealth.value >= 0" class="nexus-health-bar">
 		<div class="enemy-current-health" [style.width]="((enemyNexusHealth.value * 100) / 5) + '%'"></div>
@@ -44,9 +38,38 @@
 	<div class="summonerName">{{getPlayerSummonerName()}}</div>
 </div>
 
-<!-- Pick summoner -->
-<div *ngIf="gameState.value===2" style="position: absolute; z-index: 10;">
-	<input type="text" placeholder="Summoner Name" [(ngModel)]="summonerName"/>
-	<button (click)="sendGameSelect()">Load Deck</button>
-</div>
 <md-championpositioner></md-championpositioner>
+
+<!-- Overlays -->
+<div class="game-waiting-overlay" [hidden]="gameState.value!==1">
+	<div class="overlay-heading">
+		Mastery Duel
+	</div>
+	<div class="overlay-subtext">
+		Waiting for opponent...
+	</div>
+	<div class="share-label">
+		or Share this link to play with a friend:
+	</div>
+	<input class="share-link" type="text" readonly value="{{gameLink}}" />
+</div>
+
+<div class="game-loading-overlay" [hidden]="gameState.value!==2">
+	<div class="overlay-heading">
+		Mastery Duel
+	</div>
+	<div class="overlay-subtext">
+		Opponent found!
+	</div>
+	<div class="input-label">
+		Type in a summoner name to use&mdash;doesn't have to be your own!
+	</div>
+	<input class="input-box" type="text" [(ngModel)]="summonerName" (keydown)="onSummonerSubmit($event)"/>
+	<div class="msg" *ngIf="loadingMsg.value!==null">{{loadingMsg.value}}</div>
+</div>
+
+<div class="game-over-overlay" [hidden]="gameState.value!==4">
+	<img *ngIf="isVictor.value" class="victory" src="/public/img/Victory.png" />
+	<img *ngIf="!isVictor.value" class="defeat" src="/public/img/Defeat.png" />
+	<a class="new-game" href="/game/new">New Game</a>
+</div>

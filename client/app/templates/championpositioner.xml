@@ -49,7 +49,7 @@
 			</div>
 			<input type="text" class="message-logger-input" placeholder="Type here to chat" (keydown)="onMessageLogger($event)"/>
 		</div>
-		<div class="drawer-toggle-btn" (click)="onDrawerButtonClicked($event)">
+		<div class="drawer-toggle-btn" [class.new-message]="hasNewMessage.value && !isDrawerOpen" (click)="onDrawerButtonClicked($event)">
 			<img src="/public/img/caret.png" />
 		</div>
 		<div class="hand-container">
