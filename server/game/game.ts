@@ -2902,7 +2902,7 @@ class Katarina extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Voracity',
+			name: 'Phantom Dancers',
 			description: 'Katarina\'s action for the turn resets on kill.',
 			type: AbilityType.Passive,
 			readyTurn: 0,
@@ -3002,7 +3002,7 @@ class Kindred extends Champion {
 	constructor(owner: string, champId: number, champLevel: number) {
 		super(owner, champId, champLevel);
 		this.ability = {
-			name: 'Lamb\'s respite',
+			name: 'Lamb\'s Respite',
 			description: 'All allies in the lane become invulnerable',
 			type: AbilityType.AOEAlly,
 			readyTurn: 0,
@@ -3075,7 +3075,7 @@ class LeBlanc extends Champion {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
 					enemy.setMark(game.getTurnNum() + 1, 1);
-					update.affected.push({ uid: enemy.getUid(), status: I.Status.Marked, turnNum: game.getTurnNum() + 1 });
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Marked, turnNum: game.getTurnNum() + 2 });
 					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
 				return 4;
@@ -3103,7 +3103,7 @@ class LeeSin extends Champion {
 		super(owner, champId, champLevel);
 		this.ability = {
 			name: 'Resonating Strike',
-			description: 'Deals ' + Math.round(0.8 * this.dmg) + ' plus 1.5% for every health the target is missing as bonus damage.',
+			description: 'Deals ' + Math.round(0.8 * this.dmg) + ' damage and marks a target. Lee Sin does 1.5% bonus damage for every missing health against a marked target.',
 			type: AbilityType.SingleEnemySameLane,
 			readyTurn: 0,
 			effect: (game: Game, data: {sourceUid: string, targetUid?: string}, update: I.DataGameUpdate) => {
@@ -3114,6 +3114,8 @@ class LeeSin extends Champion {
 				if (enemy.takeDamage(game, dmg, champ, game.getTurnNum(), update)) {
 					update.killed.push({ uid: enemy.getUid(), killer: champ.getUid() });
 				} else {
+					enemy.setMark(game.getTurnNum() + 1, 1);
+					update.affected.push({ uid: enemy.getUid(), status: I.Status.Marked, turnNum: game.getTurnNum() + 2 });
 					update.damaged.push({ uid: enemy.getUid(), health: enemy.getHealth(), attacker: champ.getUid() });
 				}
 
@@ -3121,6 +3123,17 @@ class LeeSin extends Champion {
 				return 4;
 			}
 		};
+	}
+
+	public attackEnemy(game: Game, enemy: Champion, turnNum: number, update: I.DataGameUpdate): boolean {
+		let dmg = this.dmg;
+		if (enemy.isMarked()) {
+			dmg += dmg + Math.round(1.015 * (enemy.getHealth() / enemy.getMaxHealth()));
+			enemy.consumeMark();
+		}
+
+		this.movedNum = turnNum;
+		return enemy.takeDamage(game, dmg, this, turnNum, update);
 	}
 }
 championById[64] = LeeSin;
